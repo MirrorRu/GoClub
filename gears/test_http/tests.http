@@ -1,0 +1,5 @@
+GET http://localhost:8081/v1/members HTTP/1.1
+Host:localhost:8081
+User-Agent:Golang
+Accept:*/*
+Accept-Encoding:gzip, deflate, br

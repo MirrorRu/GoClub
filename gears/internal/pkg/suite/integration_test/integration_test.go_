@@ -1,0 +1,186 @@
+//go:build integration
+
+package integrationtest
+
+import (
+	"context"
+	"os"
+	"testing"
+
+	"route256/common/logger"
+	"route256/common/types"
+	"route256/loms/internal/config"
+	"route256/loms/internal/db"
+	"route256/loms/internal/model"
+	orderstorage "route256/loms/internal/repository/order_storage"
+	stockstorage "route256/loms/internal/repository/stock_storage"
+
+	"github.com/stretchr/testify/suite"
+)
+
+const (
+	user = 1
+	sku  = 773297411
+)
+
+type Suite struct {
+	suite.Suite
+	ctx          context.Context
+	dbClient     db.Client
+	stockStorage stockstorage.Repository
+	orderStorage orderstorage.Repository
+}
+
+func TestIntegrationTest(t *testing.T) {
+	suite.Run(t, &Suite{})
+
+}
+
+func (s *Suite) SetupSuite() {
+	s.ctx = context.Background()
+	s.dbClient = db.NewClient(s.ctx)
+
+	envDSN := os.Getenv(config.EnvTestDBDSN)
+	if envDSN == "" {
+		panic("Database DSN is empty")
+	}
+	var err error
+	err = s.dbClient.AddShard(config.Cfg.DNSs[0])
+	if err != nil {
+		logger.Error(ctx, "Failed to create db client", err)
+		return
+	}
+
+	s.stockStorage = stockstorage.NewRepository(s.ctx, s.dbClient)
+	if err != nil {
+		logger.Error(ctx, "Failed to create stock storage", err)
+		return
+	}
+
+	s.orderStorage = orderstorage.NewRepository(s.ctx, s.dbClient)
+	if err != nil {
+		logger.Error(ctx, "Failed to create order storage", err)
+		return
+	}
+
+}
+
+func (s *Suite) TearDownSuite() {
+	s.dbClient.Close()
+}
+
+func (s *Suite) TestStockStorage() {
+
+	qty, err := s.stockStorage.GetBySku(s.ctx, 123)
+	s.Error(err, "Нет ошибки при запросе несуществующего запаса")
+
+	// Получаем количество на начало
+	qty, err = s.stockStorage.GetBySku(s.ctx, sku)
+	s.NoError(err, "Ошибка при получении количества")
+	s.Equal(types.Qty(140), qty, "Не совпало количество на начало")
+
+	// Резервируем 10 штук
+	err = s.stockStorage.Reserve(s.ctx, stockstorage.ReserveItems{
+		{
+			Sku:      sku,
+			Quantity: 10,
+		},
+	})
+	s.NoError(err, "Ошибка при резервировании")
+
+	// Получаем количество после резервирования
+	qty, err = s.stockStorage.GetBySku(s.ctx, sku)
+	s.NoError(err, "Ошибка при получении количества")
+	s.Equal(types.Qty(130), qty, "Не совпало количество после резервирования")
+
+	// Резервируем 20 штук
+	err = s.stockStorage.Reserve(s.ctx, stockstorage.ReserveItems{
+		{
+			Sku:      sku,
+			Quantity: 20,
+		},
+	})
+	s.NoError(err, "Ошибка при резервировании")
+
+	// Получаем количество после резервирования
+	qty, err = s.stockStorage.GetBySku(s.ctx, sku)
+	s.NoError(err, "Ошибка при получении количества")
+	s.Equal(types.Qty(110), qty, "Не совпало количество после резервирования")
+
+	// Отменяем резерв
+	err = s.stockStorage.CancelReserve(s.ctx, stockstorage.ReserveItems{
+		{
+			Sku:      sku,
+			Quantity: 20,
+		},
+	})
+
+	// Получаем количество после отмены резервирования
+	qty, err = s.stockStorage.GetBySku(s.ctx, sku)
+	s.NoError(err, "Ошибка при получении количества")
+	s.Equal(types.Qty(130), qty, "Не совпало количество после отмены резервирования")
+
+	// Резервируем 30 штук
+	err = s.stockStorage.Reserve(s.ctx, stockstorage.ReserveItems{
+		{
+			Sku:      sku,
+			Quantity: 30,
+		},
+	})
+	s.NoError(err, "Ошибка при резервировании")
+
+	// Получаем количество после резервирования
+	qty, err = s.stockStorage.GetBySku(s.ctx, sku)
+	s.NoError(err, "Ошибка при получении количества")
+	s.Equal(types.Qty(100), qty, "Не совпало количество после резервирования")
+
+	// Выдача резерва
+	err = s.stockStorage.RemoveReserve(s.ctx, stockstorage.ReserveItems{
+		{
+			Sku:      sku,
+			Quantity: 30,
+		},
+	})
+
+	// Получаем количество после выдачи резервирования
+	qty, err = s.stockStorage.GetBySku(s.ctx, sku)
+	s.NoError(err, "Ошибка при получении количества")
+	s.Equal(types.Qty(100), qty, "Не совпало количество после выдачи резервирования")
+
+}
+
+func (s *Suite) TestOrderStorage() {
+
+	// Создаем заказ
+	orderID, err := s.orderStorage.Create(s.ctx, user, []*orderstorage.OrderItem{{
+		Sku:      sku,
+		Quantity: 10,
+	}})
+	s.NoError(err, "Ошибка при создании заказа")
+	s.Equal(types.OrderID(1), orderID, "Не совпал ID созданного заказа")
+
+	// Получаем созданный заказ
+	order, err := s.orderStorage.GetByID(s.ctx, orderID)
+	s.NoError(err, "Ошибка при получении созданного заказа")
+	s.Equal(types.UserID(user), order.User, "Не совпал ID пользователя")
+	s.Equal(model.OrderStatusNew, order.Status, "Не совпал статус заказа")
+
+	items := order.GetItemsMap()
+	s.Len(items, 1, "Не совпало количество позиций в заказе")
+
+	item, exists := items[sku]
+	s.True(exists, "Не найдена позиция в заказе")
+	s.NotNil(item, "Не найдена позиция в заказе")
+	s.Equal(types.SkuID(sku), item.Sku, "Не совпал код товара в заказе")
+	s.Equal(types.Qty(10), item.Quantity, "Не совпало количество в заказе")
+
+	// Изменяем статусу заказа
+	err = s.orderStorage.SetStatus(s.ctx, orderID, model.OrderStatusAwaitingPayment)
+	s.NoError(err, "Ошибка при изменении статуса заказа")
+
+	// Получаем измененный заказ
+	order, err = s.orderStorage.GetByID(s.ctx, orderID)
+	s.NoError(err, "Ошибка при получении измененного заказа")
+	s.Equal(model.OrderStatusAwaitingPayment, order.Status, "Не совпал статус заказа")
+
+}

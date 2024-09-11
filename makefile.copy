@@ -1,0 +1,200 @@
+GEARS_BIN:=$(CURDIR)/GEARS/bin
+GEARS_DBDRIVER=postgres
+GEARS_DBSTRING=postgres://postgres:postgres@localhost:5432/goclub?sslmode=disable
+GEARS_MIGRATION_DIR=./GEARS/migrations
+
+# Добавляем *.EXE для запуска под Windows
+EXESUFFIX :=
+ifeq ($(OS),Windows_NT)
+	EXESUFFIX :=.exe
+endif
+
+#starting stub
+.PHONY: hello 
+hello:
+	$(info Hello!)
+	@grep '^[^\.]\w.*\: ' Makefile
+
+include makefile-setup
+
+
+
+.PHONY: migrate-up
+migrate-up: 
+	$(GEARS_BIN)/goose -dir $(GEARS_MIGRATION_DIR) $(GEARS_DBDRIVER) $(GEARS_DBSTRING) up
+
+.PHONY: migrate-down
+migrate-down: 
+	$(GEARS_BIN)/goose -dir $(GEARS_MIGRATION_DIR) $(GEARS_DBDRIVER) $(GEARS_DBSTRING) down
+
+generate: genproto genmock gensqlc
+
+.PHONY: genmock
+genmock:
+# 	$(info Generating mocks...)
+# 	@for f in $(shell find internal -name 'genmock.go'| sort -u); do \
+# 		go generate $$f; \
+# 	done
+# 	$(info mocks generated)
+
+.PHONY: genproto
+genproto: .proto-generate
+	go mod tidy
+
+.PHONY: .proto-generate
+.proto-generate: .vendor-proto  .gears-api-generate .merge-swagger
+
+.PHONY: .vendor-rm
+.vendor-rm:
+	rm -rf vendor-proto
+
+.vendor-proto: .vendor-rm  vendor-proto/google/protobuf vendor-proto/validate vendor-proto/google/api vendor-proto/protoc-gen-openapiv2/options
+	go mod tidy
+
+# Устанавливаем proto описания google/protobuf
+vendor-proto/google/protobuf:
+	git clone -b main --single-branch -n --depth=1 --filter=tree:0 \
+		https://github.com/protocolbuffers/protobuf vendor-proto/protobuf &&\
+	cd vendor-proto/protobuf &&\
+	git sparse-checkout set --no-cone src/google/protobuf &&\
+	git checkout
+	mkdir -p vendor-proto/google
+	mv vendor-proto/protobuf/src/google/protobuf vendor-proto/google
+	rm -rf vendor-proto/protobuf
+
+# Устанавливаем proto описания validate
+vendor-proto/validate:
+	git clone -b main --single-branch --depth=2 --filter=tree:0 \
+		https://github.com/bufbuild/protoc-gen-validate vendor-proto/tmp && \
+		cd vendor-proto/tmp && \
+		git sparse-checkout set --no-cone validate &&\
+		git checkout
+		mkdir -p vendor-proto/validate
+		mv vendor-proto/tmp/validate vendor-proto/
+		rm -rf vendor-proto/tmp
+
+# Устанавливаем proto описания google/googleapis
+vendor-proto/google/api:
+	git clone -b master --single-branch -n --depth=1 --filter=tree:0 \
+ 		https://github.com/googleapis/googleapis vendor-proto/googleapis && \
+ 	cd vendor-proto/googleapis && \
+	git sparse-checkout set --no-cone google/api && \
+	git checkout
+	mkdir -p  vendor-proto/google
+	mv vendor-proto/googleapis/google/api vendor-proto/google
+	rm -rf vendor-proto/googleapis
+
+# Устанавливаем proto описания protoc-gen-openapiv2/options
+vendor-proto/protoc-gen-openapiv2/options:
+	git clone -b main --single-branch -n --depth=1 --filter=tree:0 \
+ 		https://github.com/grpc-ecosystem/grpc-gateway vendor-proto/grpc-ecosystem && \
+ 	cd vendor-proto/grpc-ecosystem && \
+	git sparse-checkout set --no-cone protoc-gen-openapiv2/options && \
+	git checkout
+	mkdir -p vendor-proto/protoc-gen-openapiv2
+	mv vendor-proto/grpc-ecosystem/protoc-gen-openapiv2/options vendor-proto/protoc-gen-openapiv2
+	rm -rf vendor-proto/grpc-ecosystem
+
+GEARS_API_PROTO_PATH:=gears/pkg/api/v1
+GEARS_API_PROTO_SRC:=gears/api/v1
+PHONY: .gears-api-generate
+.gears-api-generate: 
+	rm -rf ${GEARS_API_PROTO_PATH}
+	mkdir -p ${GEARS_API_PROTO_PATH}
+	protoc \
+	-I ${GEARS_API_PROTO_SRC} \
+	-I vendor-proto \
+	--plugin=protoc-gen-go=$(LOCAL_BIN)/protoc-gen-go$(EXESUFFIX) \
+	--go_out ${GEARS_API_PROTO_PATH} \
+	--go_opt paths=source_relative \
+	--plugin=protoc-gen-go-grpc=$(LOCAL_BIN)/protoc-gen-go-grpc$(EXESUFFIX) \
+	--go-grpc_out ${GEARS_API_PROTO_PATH} \
+	--go-grpc_opt paths=source_relative \
+	--plugin=protoc-gen-validate=$(LOCAL_BIN)/protoc-gen-validate$(EXESUFFIX) \
+	--validate_out="lang=go,paths=source_relative:${GEARS_API_PROTO_PATH}" \
+	--plugin=protoc-gen-grpc-gateway=$(LOCAL_BIN)/protoc-gen-grpc-gateway$(EXESUFFIX) \
+	--grpc-gateway_out ${GEARS_API_PROTO_PATH} \
+	--grpc-gateway_opt logtostderr=true --grpc-gateway_opt paths=source_relative --grpc-gateway_opt generate_unbound_methods=true \
+	--plugin=protoc-gen-openapiv2=$(LOCAL_BIN)/protoc-gen-openapiv2$(EXESUFFIX) \
+	--openapiv2_out ${GEARS_API_PROTO_PATH} \
+	--openapiv2_opt logtostderr=true \
+	${GEARS_API_PROTO_SRC}/*.proto
+
+
+PHONY: .merge-swagger
+.merge-swagger: 
+#	rm -rf gears/pkg/swagger
+#	mkdir -p gears/pkg/swagger
+	$(LOCAL_BIN)/go-swagger-merger$(EXESUFFIX) \
+	-o gears/pkg/swagger-ui/swagger.json \
+	${GEARS_API_PROTO_PATH}/club.swagger.json
+#	\ pkg/${STOCK_API_PROTO_PATH}/stock.swagger.json
+
+# .start:
+# 	docker-compose up --build -d 
+
+# build-all:
+# 	cd cart && GOOS=linux GOARCH=amd64 make build
+# 	cd GEARS && GOOS=linux GOARCH=amd64 make build
+# 	cd notifier && GOOS=linux GOARCH=amd64 make build
+
+# run-all: build-all .start .migrate
+
+# # запуск окружения для проверки разработки
+# run-develop:
+# 	docker-compose --file docker-compose-develop.yml up
+
+# .stop:
+# 	docker-compose down
+# #	docker rmi cart GEARS
+
+# stop-all: .stop
+
+# # остановка окружения проверки разработки
+# stop-develop:
+# 	docker-compose down
+
+# docker-up:
+# 	docker-compose up -d
+
+# docker-down:
+# 	docker-compose down
+
+# generate: .validate-min-go-version bin-deps deps-pb .generate generate-config ## Запустить генерацию кода из proto-файлов
+
+# fast-generate: deps-pb .generate ## Запустить генерацию кода из proto-файлов с пропуском шага генерации конфига и установки бинарных зависимостей
+
+# .deps-pb: .pgen-init
+# 	$(info Vendoring proto dependencies...)
+# 	rm -rf ./vendor.protogen
+# 	$(MIMIR_BIN) vendor --config $(MIMIR_CFG)
+
+# deps-pb: .deps-pb ## Запустить вендоринг proto-зависимостей с помощью Mimir
+
+# .generate:
+# 	@[ -f "buf.gen.yaml" ] || (echo "ERROR: buf.gen.yaml not found. Run 'scratch update --confirm' to fix." &&  exit 1)
+
+# 	$(info Generating code...)
+
+# 	@# С помощью Mimir запускаем генерацию кода на основе proto-файлов.
+# 	$(info Generating code based on .proto files...)
+# 	$(MIMIR_BIN) generate \
+# 		$(MIMIR_GEN_ARGS) \
+# 		--config $(MIMIR_CFG) \
+# 		--buf-bin $(BUF_BIN)
+
+# 	@# Удаляем *.pb.scratch.go во избежание поломки кода
+# 	@# на этапе генерации, связанной с переездом с esc на embed.
+# 	$(info Removing *.pb.scratch.go files...)
+# 	find $(CURDIR) \
+# 		-type f \
+# 		-name "*.pb.scratch.go" \
+# 		-exec dirname {} \; | \
+# 		PATH="$(LOCAL_BIN):$(PATH)" \
+# 		xargs -I {} bash -c 'cd {} && go mod tidy && go generate -run "(scratch|esc)" ./...'
+
+# 	$(info Tidying module requirements...)
+# 	go mod tidy
+
+# 	$(info Running goimports...)
+# 	$(GOIMPORTS_BIN) -w ./

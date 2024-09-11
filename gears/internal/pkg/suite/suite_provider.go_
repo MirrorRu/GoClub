@@ -1,0 +1,110 @@
+package suite
+
+import (
+	"context"
+	"testing"
+
+	kafka_mocks "goclub/gears/internal/pkg/kafka/mocks"
+	orderstorage "goclub/gears/internal/repository/order_storage"
+	orderstorage_mocks "goclub/gears/internal/repository/order_storage/mocks"
+	stockstorage "goclub/gears/internal/repository/stock_storage"
+	stockstorage_mocks "goclub/gears/internal/repository/stock_storage/mocks"
+	orderservice "goclub/gears/internal/service/order_service"
+	orderservice_mocks "goclub/gears/internal/service/order_service/mocks"
+	stockservce "goclub/gears/internal/service/stock_service"
+	stockservce_mocks "goclub/gears/internal/service/stock_service/mocks"
+
+	"github.com/gojuno/minimock/v3"
+)
+
+type suiteProvider struct {
+	ctx              context.Context
+	mc               *minimock.Controller
+	stockStorage     stockstorage.Repository
+	stockStorageMock *stockstorage_mocks.RepositoryMockMock
+	stockService     stockservce.Service
+	stockServiceMock *stockservce_mocks.ServiceMockMock
+	orderStorage     orderstorage.Repository
+	orderStorageMock *orderstorage_mocks.RepositoryMockMock
+	orderService     orderservice.Service
+	orderServiceMock *orderservice_mocks.ServiceMockMock
+	kafkaProducer    *kafka_mocks.ProducerMockMock
+}
+
+func NewSuiteProvider(t *testing.T, ctx context.Context) *suiteProvider {
+	return &suiteProvider{
+		ctx: ctx,
+		mc:  minimock.NewController(t),
+	}
+}
+
+func (sp *suiteProvider) GetStockStorageMock() *stockstorage_mocks.RepositoryMockMock {
+	if sp.stockStorageMock == nil {
+		sp.stockStorageMock = stockstorage_mocks.NewRepositoryMockMock(sp.mc)
+	}
+	return sp.stockStorageMock
+}
+
+func (sp *suiteProvider) GetStockStorage() stockstorage.Repository {
+	if sp.stockStorage == nil {
+		sp.stockStorage = sp.GetStockStorageMock()
+	}
+	return sp.stockStorage
+}
+
+func (sp *suiteProvider) GetOrderStorageMock() *orderstorage_mocks.RepositoryMockMock {
+	if sp.orderStorageMock == nil {
+		sp.orderStorageMock = orderstorage_mocks.NewRepositoryMockMock(sp.mc)
+	}
+	return sp.orderStorageMock
+}
+
+func (sp *suiteProvider) GetOrderStorage() orderstorage.Repository {
+	if sp.orderStorage == nil {
+		sp.orderStorage = sp.GetOrderStorageMock()
+	}
+	return sp.orderStorage
+}
+
+func (sp *suiteProvider) GetStockServiceMock() *stockservce_mocks.ServiceMockMock {
+	if sp.stockServiceMock == nil {
+		sp.stockServiceMock = stockservce_mocks.NewServiceMockMock(sp.mc)
+	}
+	return sp.stockServiceMock
+}
+
+func (sp *suiteProvider) GetStockService() stockservce.Service {
+	if sp.stockService == nil {
+		sp.stockService = stockservce.NewService(
+			sp.ctx,
+			sp.GetStockStorage(),
+		)
+	}
+	return sp.stockService
+}
+
+func (sp *suiteProvider) GetOrderServiceMock() *orderservice_mocks.ServiceMockMock {
+	if sp.orderServiceMock == nil {
+		sp.orderServiceMock = orderservice_mocks.NewServiceMockMock(sp.mc)
+	}
+	return sp.orderServiceMock
+}
+
+func (sp *suiteProvider) GetOrderService() orderservice.Service {
+	if sp.orderService == nil {
+		sp.orderService = orderservice.NewService(
+			sp.ctx,
+			sp.GetStockStorage(),
+			sp.GetOrderStorage(),
+			sp.GetKafkaProducer(),
+		)
+	}
+	return sp.orderService
+}
+
+func (sp *suiteProvider) GetKafkaProducer() *kafka_mocks.ProducerMockMock {
+	if sp.kafkaProducer == nil {
+		sp.kafkaProducer = &kafka_mocks.ProducerMockMock{}
+	}
+	return sp.kafkaProducer
+}
