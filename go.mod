@@ -1,4 +1,4 @@
-module goclub/webapp
+module goclub
 
 go 1.22.1
 
