@@ -1,16 +1,11 @@
 package activity
 
-import (
-	"goclub/internal/model"
-	"goclub/internal/repository"
-)
-
 type (
 	ActivityFilter struct {
 		nameFilter string
 	}
 
-	ActivityStorage repository.TableStorage[model.ActivityID, model.Activity, ActivityFilter]
+	//ActivityStorage repository.TableStorager[model.ActivityID, model.Activity, ActivityFilter]
 )
 
 /*

@@ -5,15 +5,25 @@ import (
 )
 
 type (
-	ClubmanID basis.ID
+	ClubmanID struct {
+		basis.ID
+	}
 
-	ClubmanName basis.Name
+	ClubmanName struct {
+		basis.Name
+	}
 
-	ClubmanBirthday basis.Date
+	ClubmanBirthday struct {
+		basis.Date
+	}
 
-	ClubmanJoiningDate basis.Date
+	ClubmanJoiningDate struct {
+		basis.Date
+	}
 
-	ClubmanPhone basis.Phone
+	ClubmanPhone struct {
+		basis.Phone
+	}
 
 	ClubmanBase struct {
 		Name        ClubmanName
@@ -26,5 +36,5 @@ type (
 
 	ClubmanRefs struct{}
 
-	Clubman basis.Table[ClubmanID, ClubmanBase, ClubmanExt, ClubmanRefs]
+	Clubman basis.TableRecord[*ClubmanID, ClubmanBase, ClubmanExt, ClubmanRefs]
 )

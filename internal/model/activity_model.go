@@ -3,9 +3,13 @@ package model
 import "goclub/internal/model/basis"
 
 type (
-	ActivityID basis.ID
+	ActivityID struct {
+		basis.ID
+	}
 
-	ActivityName basis.Name
+	ActivityName struct {
+		basis.Name
+	}
 
 	ActivityStaffmanRole uint8
 
@@ -18,7 +22,7 @@ type (
 
 	ActivityRefs struct{}
 
-	Activity basis.Table[ActivityID, ActivityBase, ActivityExt, ActivityExt]
+	Activity basis.TableRecord[*ActivityID, ActivityBase, ActivityExt, ActivityExt]
 )
 
 const (

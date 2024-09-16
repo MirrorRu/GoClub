@@ -1,6 +1,8 @@
 package basis
 
-import "time"
+import (
+	"time"
+)
 
 type BaseSingle[T any] struct {
 	Val T
@@ -11,7 +13,28 @@ func (t BaseSingle[T]) Basis() T {
 }
 
 type (
-	ID     BaseSingle[int64]
+	IDer[T comparable] interface {
+		Inc()
+		Get() T
+	}
+
+	ComparableIDer[T comparable] interface {
+		comparable
+		IDer[T]
+	}
+
+	ID BaseSingle[int64]
+)
+
+func (x *ID) Inc() {
+	x.Val++
+}
+
+func (x ID) Get() ID {
+	return x
+}
+
+type (
 	Name   BaseSingle[string]
 	Flag   BaseSingle[bool]
 	Qty    BaseSingle[float64]
@@ -19,13 +42,11 @@ type (
 	Moment BaseSingle[time.Time]
 	Amount BaseSingle[float64]
 	Phone  BaseSingle[string]
+
+	TableRecord[IDFields ComparableIDer[ID], BaseFields any, ExtFields any, RefFields any] struct {
+		ID   IDFields
+		Base BaseFields
+		Ext  ExtFields
+		Refs RefFields
+	}
 )
-
-type StructType interface{}
-
-type Table[IDFields any, BaseFields any, ExtFields any, RefFields any] struct {
-	ID   IDFields
-	Base BaseFields
-	Ext  ExtFields
-	Refs RefFields
-}

@@ -5,15 +5,25 @@ import (
 )
 
 type (
-	StaffmanID basis.ID
+	StaffmanID struct {
+		basis.ID
+	}
 
-	StaffmanName basis.Name
+	StaffmanName struct {
+		basis.Name
+	}
 
-	StaffmanBirthday basis.Date
+	StaffmanBirthday struct {
+		basis.Date
+	}
 
-	StaffmanJoiningDate basis.Date
+	StaffmanJoiningDate struct {
+		basis.Date
+	}
 
-	StaffmanPhone basis.Phone
+	StaffmanPhone struct {
+		basis.Phone
+	}
 
 	StaffmanBase struct {
 		Name        StaffmanName
@@ -25,5 +35,5 @@ type (
 	StaffmanExt  struct{}
 	StaffmanRefs struct{}
 
-	Staffman basis.Table[StaffmanID, StaffmanBase, StaffmanExt, StaffmanRefs]
+	Staffman basis.TableRecord[*StaffmanID, StaffmanBase, StaffmanExt, StaffmanRefs]
 )
