@@ -3,6 +3,7 @@ package repository
 import (
 	"fmt"
 	"goclub/internal/model/basis"
+	"strings"
 	"sync"
 )
 
@@ -16,7 +17,11 @@ type (
 		GetID() T
 	}
 
-	TableStorager[IDType basis.ComparableIDer[any], TableStructType TableStructTyper[IDType], FilteringType any] interface {
+	TableFilter[T any] interface {
+		Filter(T) (acceptable bool)
+	}
+
+	TableStorager[IDType basis.ComparableIDer[any], TableStructType TableStructTyper[IDType], FilteringType TableFilter[TableStructType]] interface {
 		Add(TableStructType) (IDType, error)
 		Read(IDType) (TableStructType, error)
 		Update(TableStructType) error
@@ -28,6 +33,10 @@ type (
 		locker  sync.Mutex
 		lastID  IDType
 		storage map[IDType]TableStructType
+	}
+
+	TableSubstrFilter[T any] struct {
+		subStr2find string
 	}
 )
 
@@ -82,6 +91,20 @@ func (s *TableMemoryStore[IDType, TableStructType]) Delete(id IDType) error {
 	return nil
 }
 
-/*
-	List(FilteringType, TableReadOption) ([]TableStructType, error)
-*/
+func (s *TableMemoryStore[IDType, TableStructType]) List(filter TableFilter[TableStructType], readOpt TableReadOption) ([]TableStructType, error) {
+	result := make([]TableStructType, 0)
+	for _, v := range s.storage {
+		if filter.Filter(v) {
+			result = append(result, v)
+		}
+	}
+	return result, nil
+}
+
+func NewTableSubstrFilter[T any](subStr2find string) TableSubstrFilter[T] {
+	return TableSubstrFilter[T]{subStr2find: subStr2find}
+}
+
+func (s TableSubstrFilter[T]) Filter(x T) (acceptable bool) {
+	return strings.Contains(fmt.Sprintf("%v", x), s.subStr2find)
+}
