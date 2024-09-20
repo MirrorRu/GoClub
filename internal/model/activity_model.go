@@ -22,7 +22,9 @@ type (
 
 	ActivityRefs struct{}
 
-	Activity basis.TableRecord[*ActivityID, ActivityBase, ActivityExt, ActivityExt]
+	Activity struct {
+		basis.TableRecord[ActivityID, ActivityBase, ActivityExt, ActivityExt]
+	}
 )
 
 const (
@@ -31,3 +33,8 @@ const (
 	ActivityStaffmanRoleSuperviser
 	ActivityStaffmanRoleSupplier
 )
+
+func (id ActivityID) NewValue() ActivityID {
+	id.Val++
+	return id
+}

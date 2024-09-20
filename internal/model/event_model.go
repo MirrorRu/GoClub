@@ -2,6 +2,7 @@ package model
 
 import (
 	"goclub/internal/model/basis"
+	"time"
 )
 
 type (
@@ -19,7 +20,6 @@ type (
 		basis.Moment
 	}
 
-/*
 	EventStaffItem struct {
 		Role    ActivityStaffmanRole
 		Staffer Staffman
@@ -42,9 +42,10 @@ type (
 		Staff    EventStaff
 		Clubbers EventClubbers
 	}
-*/
 
-// Event basis.TableRecord[EventID, EventBase, EventExt, EventRefs]
+	Event struct {
+		basis.TableRecord[EventID, EventBase, EventExt, EventRefs]
+	}
 )
 
 const (
@@ -53,3 +54,8 @@ const (
 	EventStatusCompleted
 	EventStatusCancelled
 )
+
+func (id EventID) NewValue() EventID {
+	id.Val++
+	return id
+}

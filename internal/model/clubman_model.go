@@ -36,5 +36,12 @@ type (
 
 	ClubmanRefs struct{}
 
-	Clubman basis.TableRecord[*ClubmanID, ClubmanBase, ClubmanExt, ClubmanRefs]
+	Clubman struct {
+		basis.TableRecord[ClubmanID, ClubmanBase, ClubmanExt, ClubmanRefs]
+	}
 )
+
+func (id ClubmanID) NewValue() ClubmanID {
+	id.Val++
+	return id
+}

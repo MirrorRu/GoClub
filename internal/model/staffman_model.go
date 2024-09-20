@@ -35,5 +35,12 @@ type (
 	StaffmanExt  struct{}
 	StaffmanRefs struct{}
 
-	Staffman basis.TableRecord[*StaffmanID, StaffmanBase, StaffmanExt, StaffmanRefs]
+	Staffman struct {
+		basis.TableRecord[StaffmanID, StaffmanBase, StaffmanExt, StaffmanRefs]
+	}
 )
+
+func (id StaffmanID) NewValue() StaffmanID {
+	id.Val++
+	return id
+}
