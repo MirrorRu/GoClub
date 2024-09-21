@@ -9,25 +9,25 @@ type (
 	FilterCriteriaName  string
 	FilterCriteriaValue string
 
-	FilerCriteria struct {
+	FilterCriteria struct {
 		Name  FilterCriteriaName
 		Value FilterCriteriaValue
 	}
 
-	FilerCriterias []FilerCriteria
+	FilterCriterias []FilterCriteria
 
 	TableFilter[T any] interface {
 		Filter(T) (acceptable bool)
-		SetCriterias(FilerCriterias)
-		Criterias() FilerCriterias
+		SetCriterias(FilterCriterias)
+		Criterias() FilterCriterias
 	}
 
 	TableSubstrFilter[T any] struct {
-		criterias FilerCriterias
+		criterias FilterCriterias
 	}
 )
 
-func NewTableSubstrFilter[T any](fc FilerCriterias) *TableSubstrFilter[T] {
+func NewTableSubstrFilter[T any](fc FilterCriterias) *TableSubstrFilter[T] {
 	return &TableSubstrFilter[T]{
 		criterias: fc,
 	}
@@ -43,10 +43,10 @@ func (s *TableSubstrFilter[T]) Filter(x T) (acceptable bool) {
 	return false
 }
 
-func (s *TableSubstrFilter[T]) Criterias() FilerCriterias {
+func (s *TableSubstrFilter[T]) Criterias() FilterCriterias {
 	return s.criterias
 }
 
-func (s *TableSubstrFilter[T]) SetCriterias(fc FilerCriterias) {
+func (s *TableSubstrFilter[T]) SetCriterias(fc FilterCriterias) {
 	s.criterias = fc
 }

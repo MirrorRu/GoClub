@@ -23,7 +23,7 @@ type (
 	ActivityRefs struct{}
 
 	Activity struct {
-		basis.TableRecord[ActivityID, ActivityBase, ActivityExt, ActivityExt]
+		basis.TableRecord[ActivityID, ActivityBase, ActivityExt, ActivityExt] `model:"Activity"`
 	}
 )
 

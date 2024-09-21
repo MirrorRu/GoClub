@@ -7,8 +7,6 @@ import (
 )
 
 type (
-	//StringFilter string
-
 	TableReadOption uint32
 
 	TableIdentier[T comparable] interface {
@@ -30,9 +28,10 @@ type (
 	}
 
 	TableMemoryStore[IDType IDTyper[IDType], TableStructType TableIdentier[IDType]] struct {
-		locker  sync.Mutex
-		lastID  IDType
-		storage map[IDType]TableStructType
+		locker    sync.Mutex
+		lastID    IDType
+		storage   map[IDType]TableStructType
+		registrar StoragesRegistrar
 	}
 )
 
@@ -43,6 +42,11 @@ const (
 	TableReadWithExt
 	TableReadWithRefs
 )
+
+func (s *TableMemoryStore[IDType, TableStructType]) Init(registrar StoragesRegistrar) {
+	s.storage = make(map[IDType]TableStructType)
+	s.registrar = registrar
+}
 
 func (s *TableMemoryStore[IDType, TableStructType]) Add(t TableStructType) (IDType, error) {
 	s.locker.Lock()
