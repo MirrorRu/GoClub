@@ -15,11 +15,29 @@ type (
 	}
 
 	TableStorager[IDType comparable, TableStructType TableIdentier[IDType], FilteringType TableFilter[TableStructType]] interface {
-		Add(*TableStructType) (IDType, error)
-		Read(IDType) (*TableStructType, error)
-		Update(*TableStructType) error
+		Add(TableStructType) (IDType, error)
+		Read(IDType) (TableStructType, error)
+		Update(TableStructType) error
 		Delete(IDType) error
-		List(FilteringType, TableReadOption) ([]*TableStructType, error)
+		List(FilteringType, TableReadOption) ([]TableStructType, error)
+	}
+
+	TableStorager2[IDType, TableStructType, FilteringType any] interface {
+		Add(TableStructType) (IDType, error)
+		Read(IDType) (TableStructType, error)
+		Update(TableStructType) error
+		Delete(IDType) error
+		List(FilteringType, TableReadOption) ([]TableStructType, error)
+	}
+
+	TableStorager3 interface {
+		Add(any) (any, error)
+		/*
+			Read(any) (any, error)
+			Update(any) error
+			Delete(any) error
+			List(any, TableReadOption) (any, error)
+		*/
 	}
 
 	IDTyper[T comparable] interface {
