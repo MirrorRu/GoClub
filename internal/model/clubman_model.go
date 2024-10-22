@@ -2,6 +2,7 @@ package model
 
 import (
 	"goclub/internal/model/basis"
+	"goclub/internal/repository"
 )
 
 type (
@@ -41,7 +42,17 @@ type (
 	}
 )
 
-func (id ClubmanID) NewValue() ClubmanID {
+func (id ClubmanID) NewValue() repository.NewValuer {
 	id.Val++
 	return id
+}
+
+type ClubmanInmemStore struct {
+	repository.TableMemoryStore[ClubmanID, *Clubman]
+}
+
+func NewClubmanInmemStore(registrar repository.StoragesRegistrar) *ClubmanInmemStore {
+	s := new(ClubmanInmemStore)
+	s.TableMemoryStore.Init(registrar)
+	return s
 }

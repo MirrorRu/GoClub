@@ -1,6 +1,10 @@
 package model
 
-import "goclub/internal/model/basis"
+/*
+import (
+	"goclub/internal/model/basis"
+	"goclub/internal/repository"
+)
 
 type (
 	ActivityID struct {
@@ -38,3 +42,17 @@ func (id ActivityID) NewValue() ActivityID {
 	id.Val++
 	return id
 }
+
+func (id *ActivityID) IncValue() {
+	id.Val++
+}
+
+func (id *ActivityID) NewValuePtr() *ActivityID {
+	id.Val++
+	return repository.IRecordID(id)
+}
+
+func (id *ActivityID) IncValuePtr() {
+	id.Val++
+}
+*/

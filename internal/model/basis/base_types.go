@@ -40,20 +40,16 @@ type (
 		Ext  ExtFields
 		Refs RefFields
 	}
-
-	NewValuer[T any] interface {
-		NewValue() T
-	}
 )
 
 func (sb SingleBased[T]) Base() T {
 	return sb.Val
 }
 
-func (t *TableRecord[IDFields, BaseFields, ExtFields, RefFields]) SetID(id IDFields) {
-	t.ID = id
+func (t *TableRecord[IDFields, BaseFields, ExtFields, RefFields]) SetID(id any) {
+	t.ID = id.(IDFields)
 }
 
-func (t *TableRecord[IDFields, BaseFields, ExtFields, RefFields]) GetID() IDFields {
+func (t *TableRecord[IDFields, BaseFields, ExtFields, RefFields]) GetID() any {
 	return t.ID
 }

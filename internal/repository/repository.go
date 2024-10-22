@@ -2,53 +2,44 @@ package repository
 
 import (
 	"fmt"
-	"goclub/internal/model/basis"
 	"sync"
 )
 
 type (
-	TableReadOption uint32
+	TableReadOption int
 
-	TableIdentier[T comparable] interface {
-		SetID(T)
-		GetID() T
+	NewValuer interface {
+		NewValue() NewValuer
 	}
 
-	TableStorager[IDType comparable, TableStructType TableIdentier[IDType], FilteringType TableFilter[TableStructType]] interface {
-		Add(TableStructType) (IDType, error)
-		Read(IDType) (TableStructType, error)
-		Update(TableStructType) error
-		Delete(IDType) error
-		List(FilteringType, TableReadOption) ([]TableStructType, error)
-	}
-
-	TableStorager2[IDType, TableStructType, FilteringType any] interface {
-		Add(TableStructType) (IDType, error)
-		Read(IDType) (TableStructType, error)
-		Update(TableStructType) error
-		Delete(IDType) error
-		List(FilteringType, TableReadOption) ([]TableStructType, error)
-	}
-
-	TableStorager3 interface {
-		Add(any) (any, error)
-		/*
-			Read(any) (any, error)
-			Update(any) error
-			Delete(any) error
-			List(any, TableReadOption) (any, error)
-		*/
-	}
-
-	IDTyper[T comparable] interface {
+	IRowID interface {
 		comparable
-		basis.NewValuer[T]
+		NewValuer
 	}
 
-	TableMemoryStore[IDType IDTyper[IDType], TableStructType TableIdentier[IDType]] struct {
+	ITableStruct interface {
+		SetID(any)
+		GetID() any
+	}
+
+	ITableFilter interface {
+		Filter(ITableStruct) (acceptable bool)
+		SetCriterias(FilterCriterias)
+		Criterias() FilterCriterias
+	}
+
+	ITableStorage interface {
+		Add(ITableStruct) (any, error)
+		Read(any) (ITableStruct, error)
+		Update(ITableStruct) error
+		Delete(any) error
+		// List(ITableFilter, TableReadOption) ([]ITableStruct, error)
+	}
+
+	TableMemoryStore[IDType IRowID, TableStruct ITableStruct] struct {
 		locker    sync.Mutex
 		lastID    IDType
-		storage   map[IDType]TableStructType
+		storage   map[IDType]TableStruct
 		registrar StoragesRegistrar
 	}
 )
@@ -66,19 +57,27 @@ func (s *TableMemoryStore[IDType, TableStructType]) Init(registrar StoragesRegis
 	s.registrar = registrar
 }
 
-func (s *TableMemoryStore[IDType, TableStructType]) Add(t TableStructType) (IDType, error) {
+func (s *TableMemoryStore[IDType, TableStructType]) Add(t ITableStruct) (any, error) {
 	s.locker.Lock()
 	defer s.locker.Unlock()
-	s.lastID = s.lastID.NewValue()
+	x, typeOK := s.lastID.NewValue().(IDType)
+	if !typeOK {
+		panic("bad type assertion in Add")
+	}
+	s.lastID = x
 	t.SetID(s.lastID)
-	s.storage[s.lastID] = t
+	s.storage[s.lastID] = t.(TableStructType)
 	return s.lastID, nil
 }
 
-func (s *TableMemoryStore[IDType, TableStructType]) Read(id IDType) (TableStructType, error) {
+func (s *TableMemoryStore[IDType, TableStructType]) Read(key any) (ITableStruct, error) {
+	id, typeOK := key.(IDType)
+	if !typeOK {
+		panic("bad type assertion")
+	}
+
 	s.locker.Lock()
 	defer s.locker.Unlock()
-
 	val, ok := s.storage[id]
 	if !ok {
 		return val, fmt.Errorf("key %v not found", id)
@@ -86,21 +85,29 @@ func (s *TableMemoryStore[IDType, TableStructType]) Read(id IDType) (TableStruct
 	return val, nil
 }
 
-func (s *TableMemoryStore[IDType, TableStructType]) Update(data TableStructType) error {
+func (s *TableMemoryStore[IDType, TableStructType]) Update(data ITableStruct) error {
 	s.locker.Lock()
 	defer s.locker.Unlock()
 
-	id := data.GetID()
-	_, ok := s.storage[id]
-	if !ok {
+	id, typeOK := data.GetID().(IDType)
+	if !typeOK {
+		panic("bab type assertion")
+	}
+	_, inMap := s.storage[id]
+	if !inMap {
 		return fmt.Errorf("key %v not found", id)
 	}
-	s.storage[id] = data
+	s.storage[id] = data.(TableStructType)
 
 	return nil
 }
 
-func (s *TableMemoryStore[IDType, TableStructType]) Delete(id IDType) error {
+func (s *TableMemoryStore[IDType, TableStructType]) Delete(key any) error {
+	id, typeOK := key.(IDType)
+	if !typeOK {
+		panic("bad type assertion")
+	}
+
 	s.locker.Lock()
 	defer s.locker.Unlock()
 

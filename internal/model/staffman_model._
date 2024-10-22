@@ -1,5 +1,6 @@
 package model
 
+/*
 import (
 	"goclub/internal/model/basis"
 )
@@ -44,3 +45,4 @@ func (id StaffmanID) NewValue() StaffmanID {
 	id.Val++
 	return id
 }
+*/
