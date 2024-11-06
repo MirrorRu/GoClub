@@ -1,5 +1,5 @@
 module goclub
 
-go 1.22.1
+go 1.23
 
 require google.golang.org/protobuf v1.35.1

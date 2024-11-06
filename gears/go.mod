@@ -1,6 +1,6 @@
 module goclub/gears
 
-go 1.22
+go 1.23
 
 require (
 	github.com/envoyproxy/protoc-gen-validate v1.1.0
