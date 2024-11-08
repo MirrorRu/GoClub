@@ -11,6 +11,7 @@ const (
 	EnvHTTPAddress = "ENGINE_HTTP_ADDR"
 
 	HTTPAddrDefault = ":8081"
+	GRPCAddrDefault = ":8082"
 	DBDefaultDSN    = "postgres://postgres:postgres@localhost:5432/goclub?sslmode=disable"
 )
 
@@ -23,6 +24,7 @@ type (
 		AppName     string
 		AppVersion  string
 		HTTPAddress string
+		GRPCAddress string
 		DSNs        DBDSN
 	}
 )
@@ -43,6 +45,7 @@ func (cfg *AppConfig) initDefault() {
 	cfg.AppName = "GoClub"
 	cfg.AppVersion = "v0.0.1"
 	cfg.HTTPAddress = HTTPAddrDefault
+	cfg.GRPCAddress = GRPCAddrDefault
 	cfg.DSNs = DBDSN{Master: DBDefaultDSN, Slave: DBDefaultDSN}
 }
 
