@@ -21,7 +21,7 @@ import (
 const pkgLogName = "httpServer"
 
 type HTTPService interface {
-	RegisterHttpHandler(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error
+	RegisterHttpServer(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error
 }
 
 type Server interface {
@@ -46,6 +46,7 @@ func NewServer(ctx context.Context, httpAddr, grpcAddr string) (Server, error) {
 		ctx:   ctx,
 		mux:   http.NewServeMux(),
 		gwmux: runtime.NewServeMux(
+		// TODO select headers to transfer
 		// runtime.WithMetadata(func(ctx context.Context, request *http.Request) metadata.MD {
 		// 	md := make(metadata.MD, len(request.Header))
 		// 	metadata.Pairs()
@@ -119,7 +120,7 @@ func (s *server) Stop() error {
 
 func (s *server) RegisterAPI(api []HTTPService) error {
 	for _, singleAPI := range api {
-		err := singleAPI.RegisterHttpHandler(s.ctx, s.gwmux, s.conn)
+		err := singleAPI.RegisterHttpServer(s.ctx, s.gwmux, s.conn)
 		if err != nil {
 			return nil
 		}

@@ -4,7 +4,7 @@
 // - protoc             v5.28.3
 // source: goclub.proto
 
-package grpc_api
+package api
 
 import (
 	context "context"

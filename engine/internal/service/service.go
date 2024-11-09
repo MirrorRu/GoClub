@@ -1,11 +1,13 @@
-package grpcservice
+package service
 
 import (
 	"context"
 	"fmt"
 
-	"goclub/engine/grpc_api"
+	"goclub/engine/internal/api"
 	"goclub/engine/internal/controller"
+	grpcserver "goclub/engine/internal/grpc_server"
+	httpserver "goclub/engine/internal/http_server"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"google.golang.org/grpc"
@@ -14,8 +16,13 @@ import (
 
 const pkgName = "gearsapi"
 
+type AppService interface {
+	grpcserver.GRPCService
+	httpserver.HTTPService
+}
+
 type API struct {
-	grpc_api.UnimplementedGoClubAPIServer
+	api.UnimplementedGoClubAPIServer
 	controller controller.Controller
 }
 
@@ -28,20 +35,20 @@ func NewAPI(
 }
 
 func (a *API) RegisterGrpcServer(server *grpc.Server) {
-	grpc_api.RegisterGoClubAPIServer(server, a)
+	api.RegisterGoClubAPIServer(server, a)
 }
 
-func (a *API) RegisterHttpHandler(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error {
-	const fnName = ".RegisterHttpHandler"
-	err := grpc_api.RegisterGoClubAPIHandler(ctx, mux, conn)
+func (a *API) RegisterHttpServer(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error {
+	const fnName = ".RegisterHttpServer"
+	err := api.RegisterGoClubAPIHandler(ctx, mux, conn)
 	if err != nil {
 		return fmt.Errorf(pkgName+fnName+" - failed to register gateway: %w", err)
 	}
 	return nil
 }
 
-func (a *API) Ping(ctx context.Context, req *emptypb.Empty) (*grpc_api.PingResponse, error) {
-	response := grpc_api.PingResponse{
+func (a *API) Ping(ctx context.Context, req *emptypb.Empty) (*api.PingResponse, error) {
+	response := api.PingResponse{
 		Message: a.controller.Ping(ctx),
 	}
 

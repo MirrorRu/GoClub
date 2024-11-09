@@ -7,8 +7,8 @@ import (
 	"goclub/engine/internal/config"
 	"goclub/engine/internal/controller"
 	grpcserver "goclub/engine/internal/grpc_server"
-	grpcservice "goclub/engine/internal/grpc_service"
 	httpserver "goclub/engine/internal/http_server"
+	"goclub/engine/internal/service"
 	"os"
 	"os/signal"
 	"syscall"
@@ -21,11 +21,17 @@ const (
 	shutdownTimeoutSeconds = 3
 )
 
+type StarterStoper interface {
+	Start() error
+	Stop() error
+}
+
 type (
 	app struct {
 		//Providers, Adapters and Services
-		controller  controller.Controller
-		grpcService grpcserver.GRPCService
+		controller controller.Controller
+		appSvc     service.AppService
+		grpcSvc    grpcserver.GRPCService
 	}
 )
 
@@ -39,81 +45,71 @@ func (a *app) Controller(ctc context.Context) controller.Controller {
 	}
 	return a.controller
 }
-func (a *app) GRPCService(ctx context.Context) grpcserver.GRPCService {
-	if a.grpcService == nil {
-		a.grpcService = grpcservice.NewAPI(a.Controller(ctx))
+
+func (a *app) AppService(ctx context.Context) service.AppService {
+	if a.appSvc == nil {
+		a.appSvc = service.NewAPI(a.Controller(ctx))
 	}
-	return a.grpcService
+	return a.appSvc
 }
 
 func (a *app) Run(ctx context.Context, cfg *config.AppConfig) error {
 	const fnName = "Run"
 	logger.Debug(ctx, fmt.Sprintf(pkgName+fnName+": cfg=%v", *cfg))
-	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
-	defer stop()
+	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer cancel()
 
 	g, gCtx := errgroup.WithContext(ctx)
 
 	// Grpc Server >>>
-	grpcServer := grpcserver.NewGRPCServer(ctx, cfg.GRPCAddress)
-	grpcServer.RegisterAPI([]grpcserver.GRPCService{a.GRPCService(ctx)})
+	grpcSrv := grpcserver.NewGRPCServer(ctx, cfg.GRPCAddress)
+	grpcSrv.RegisterAPI([]grpcserver.GRPCService{a.AppService(ctx)})
 
 	g.Go(func() error {
-		err := grpcServer.Start()
-		logger.Info(ctx, pkgName+fnName+" - grpcService ends", "error", err)
-		stop()
+		err := grpcSrv.Start()
+		logger.Info(ctx, pkgName+fnName+" - service ends", "error", err)
+		cancel()
 		return err
 	})
 	g.Go(func() error {
 		<-gCtx.Done()
-		logger.Info(ctx, pkgName+fnName+" - grpc service shutdown!")
-		return grpcServer.Stop()
+		logger.Info(ctx, pkgName+fnName+" - gPRC server shutdown!")
+		if err := grpcSrv.Stop(); err != nil {
+			return fmt.Errorf(pkgName+fnName+" - gPRC server shutdown error: %w", err)
+		}
+		return grpcSrv.Stop()
 	})
 	// <<< gRPC Server
 
 	// Http Server >>>
-	httpServer, err := httpserver.NewServer(ctx, cfg.HTTPAddress, cfg.GRPCAddress)
+	httpSrv, err := httpserver.NewServer(ctx, cfg.HTTPAddress, cfg.GRPCAddress)
 	if err != nil {
 		logger.Error(ctx, pkgName+fnName+" - httpserver.NewServer fail", err)
-		stop()
+		cancel()
 	}
-	err = httpServer.RegisterAPI([]httpserver.HTTPService{a.GRPCService(ctx)})
+	err = httpSrv.RegisterAPI([]httpserver.HTTPService{a.AppService(ctx)})
 	if err != nil {
 		logger.Error(ctx, pkgName+fnName+" - httpserver.RegisterAPI fail", err)
-		stop()
+		cancel()
 	}
 
 	g.Go(func() error {
-		err := httpServer.Start()
-		stop()
-		return fmt.Errorf(pkgName+fnName+" - httpServer ends: %w", err)
+		defer cancel()
+		if err := httpSrv.Start(); err != nil {
+			return fmt.Errorf(pkgName+fnName+" - httpServer ends: %w", err)
+		}
+		return nil
 	})
 
 	g.Go(func() error {
 		<-gCtx.Done()
-		return fmt.Errorf(pkgName+fnName+" - httpServer shutdown: %w", httpServer.Stop())
+		logger.Info(ctx, pkgName+fnName+" - HTTP server shutdown!")
+		if err := httpSrv.Stop(); err != nil {
+			return fmt.Errorf(pkgName+fnName+" - HTTP server shutdown error: %w", err)
+		}
+		return nil
 	})
 	// <<< Http Server
-
-	// mux := http.NewServeMux()
-	// mux.HandleFunc("GET /", func(response http.ResponseWriter, request *http.Request) {
-	// 	// Приветствие первой страницы
-	// 	logger.Debug(ctx, "Hello()", "PATH", request.URL.Path)
-	// 	response.Write([]byte("Привет! " + request.URL.Path))
-	// })
-
-	// httpServer := &http.Server{Addr: cfg.HTTPAddress, Handler: mux}
-
-	// g.Go(func() error {
-	// 	return httpServer.ListenAndServe()
-	// })
-
-	// g.Go(func() error {
-	// 	<-gCtx.Done()
-	// 	timeoutCtx, timeoutCancel := context.WithTimeout(context.Background(), shutdownTimeoutSeconds*time.Second)
-	// 	defer timeoutCancel()
-	// 	return httpServer.Shutdown(timeoutCtx)
-	// })
 
 	logger.Info(ctx, "Application started")
 	return g.Wait()

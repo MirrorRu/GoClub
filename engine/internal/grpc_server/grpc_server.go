@@ -5,16 +5,19 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
 
 const pkgLogName = "grpcServer"
 
+// type AppService interface {
+// 	RegisterGrpcServer(server *grpc.Server)
+// 	RegisterHttpServer(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error
+// }
+
 type GRPCService interface {
 	RegisterGrpcServer(server *grpc.Server)
-	RegisterHttpHandler(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error
 }
 
 type grpcServer struct {

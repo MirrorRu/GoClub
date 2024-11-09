@@ -1,8 +1,8 @@
 @mkdir vendor\proto\google
 @goto next
 rmdir /S /Q temp\protobuf.tmp
-git clone --depth 1 --no-checkout https://github.com/protocolbuffers/protobuf temp/protobuf.tmp
-cd temp/protobuf.tmp
+git clone --depth 1 --no-checkout https://github.com/protocolbuffers/internal/protobuf temp/internal/protobuf.tmp
+cd temp/internal/protobuf.tmp
 git checkout HEAD -- src*.proto
 cd ../..
 rmdir /S /Q vendor\proto\google\protobuf
