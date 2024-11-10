@@ -15,7 +15,7 @@ type APIServer interface {
 	httpserver.HTTPAPIs
 }
 
-type AppService interface {
+type AppServer interface {
 	GRPCAPIs() []grpcserver.GRPCAPI
 	HTTPAPIs() []httpserver.HTTPAPIs
 }

@@ -16,22 +16,24 @@ const pkgName = "ClubServer"
 
 type clubServer struct {
 	api.UnimplementedClubServer
-	service service.AppService
+	application service.AppService
+	club        service.ClubService
 }
 
 func NewClubServer(
-	controller service.AppService,
+	appSvc service.AppService,
 ) *clubServer {
 	return &clubServer{
-		service: controller,
+		application: appSvc,
+		club:        appSvc.Club(),
 	}
 }
 
-func (a *clubServer) RegisterGrpcServer(server *grpc.Server) {
-	api.RegisterClubServer(server, a)
+func (srv *clubServer) RegisterGrpcServer(server *grpc.Server) {
+	api.RegisterClubServer(server, srv)
 }
 
-func (a *clubServer) RegisterHttpServer(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error {
+func (srv *clubServer) RegisterHttpServer(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error {
 	const fnName = ".RegisterHttpServer"
 	if err := api.RegisterClubHandler(ctx, mux, conn); err != nil {
 		return fmt.Errorf(pkgName+fnName+" - failed to call RegisterClubHandler: %w", err)
@@ -40,9 +42,9 @@ func (a *clubServer) RegisterHttpServer(ctx context.Context, mux *runtime.ServeM
 	return nil
 }
 
-func (a *clubServer) Ping(ctx context.Context, req *emptypb.Empty) (*api.PingResponse, error) {
+func (srv *clubServer) Ping(ctx context.Context, req *emptypb.Empty) (*api.PingResponse, error) {
 	response := api.PingResponse{
-		Message: a.service.Ping(ctx),
+		Message: srv.club.Ping(),
 	}
 
 	return &response, nil

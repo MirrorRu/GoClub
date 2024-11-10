@@ -15,14 +15,14 @@ const pkgName = "MemberServer"
 
 type memberServer struct {
 	api.UnimplementedMembersServer
-	controller service.AppService
+	actor service.AppService
 }
 
 func NewMemberServer(
 	controller service.AppService,
 ) *memberServer {
 	return &memberServer{
-		controller: controller,
+		actor: controller,
 	}
 }
 

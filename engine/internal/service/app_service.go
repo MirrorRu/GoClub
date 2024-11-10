@@ -1,29 +1,43 @@
 package service
 
 import (
-	"context"
+	"goclub/engine/internal/repository"
+	clubservice "goclub/engine/internal/service/club"
+	memberservice "goclub/engine/internal/service/member"
 )
 
 type ClubService interface {
-	Ping(ctx context.Context) string
+	Do()
+	Ping() string
 }
 
 type MembersService interface {
+	Do()
 }
 
 type AppService interface {
-	ClubService
-	MembersService
+	Club() ClubService
+	Members() MembersService
 }
 
 type (
-	appService struct{}
+	appService struct {
+		club    ClubService
+		members MembersService
+	}
 )
 
-func NewService() AppService {
-	return new(appService)
+func NewAppService(repo repository.Repository) *appService {
+	return &appService{
+		club:    clubservice.NewClubService(repo),
+		members: memberservice.NewMemberService(repo),
+	}
 }
 
-func (c *appService) Ping(context.Context) string {
-	return "Pong"
+func (svc *appService) Club() ClubService {
+	return svc.club
+}
+
+func (svc *appService) Members() MembersService {
+	return svc.members
 }

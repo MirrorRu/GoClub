@@ -7,6 +7,7 @@ import (
 	"goclub/engine/internal/config"
 	grpcserver "goclub/engine/internal/grpc_server"
 	httpserver "goclub/engine/internal/http_server"
+	"goclub/engine/internal/repository"
 	"goclub/engine/internal/server"
 	"goclub/engine/internal/service"
 	"os"
@@ -38,13 +39,14 @@ type AppService interface {
 type (
 	app struct {
 		//Providers, Adapters and Services
-		controller service.AppService
-		appSvc     server.AppService
+		appSvc     service.AppService
+		appSrv     server.AppServer
 		errGrp     *errgroup.Group
 		errGrpCtx  context.Context
 		grpcSrv    grpcserver.GRPCServer
 		httpSrv    httpserver.HTTPServer
 		cancelFunc context.CancelFunc
+		repo       repository.Repository
 	}
 )
 
@@ -52,20 +54,27 @@ func NewApp() app {
 	return app{}
 }
 
-// Controller внутренний контролер логики
-func (a *app) Controller(ctc context.Context) service.AppService {
-	if a.controller == nil {
-		a.controller = service.NewService()
+// AppService внутренний контролер логики
+func (a *app) AppService(ctc context.Context) service.AppService {
+	if a.appSvc == nil {
+		a.appSvc = service.NewAppService(a.Repo())
 	}
-	return a.controller
+	return a.appSvc
 }
 
 // AppServer доступ к сервисам приложения
-func (a *app) AppServer(ctx context.Context) server.AppService {
-	if a.appSvc == nil {
-		a.appSvc = server.NewAppServer(a.Controller(ctx))
+func (a *app) AppServer(ctx context.Context) server.AppServer {
+	if a.appSrv == nil {
+		a.appSrv = server.NewAppServer(a.AppService(ctx))
 	}
-	return a.appSvc
+	return a.appSrv
+}
+
+func (a *app) Repo() repository.Repository {
+	if a.repo == nil {
+		a.repo = repository.NewPgDBRepo(config.Cfg.DSNs)
+	}
+	return a.repo
 }
 
 // runComponents запускает с работу компоненты системы с возможностью остановки по отмене контекста
@@ -95,8 +104,15 @@ func (a *app) Run(ctx context.Context, cfg *config.AppConfig) (err error) {
 	ctx, a.cancelFunc = signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer a.cancelFunc()
 
+	a.AppServer(ctx) // Инициализаруем объекты по цепочке Server-Service-Repo-...
+
 	//Создаем "группу контроля работы" errgroup.Group и констекст для остановки смежных процессов
 	a.errGrp, a.errGrpCtx = errgroup.WithContext(ctx)
+
+	// Запускаем репозиторий
+	repoStartStoper := NewStartStopAdpt(ctx, a.Repo().Open, a.Repo().Close)
+	a.runComponent(ctx, AppComponentInfo{cargo: repoStartStoper, title: "Repository"})
+	// <<<
 
 	// Создаем и запускаем gRPC-сервер
 	a.grpcSrv = grpcserver.NewGRPCServer(ctx, cfg.GRPCAddress)
