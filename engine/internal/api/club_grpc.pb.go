@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.4.0
 // - protoc             v5.28.3
-// source: goclub.proto
+// source: club.proto
 
 package api
 
@@ -107,5 +107,5 @@ var Club_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "goclub.proto",
+	Metadata: "club.proto",
 }
