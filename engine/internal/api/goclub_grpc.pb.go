@@ -20,90 +20,90 @@ import (
 const _ = grpc.SupportPackageIsVersion8
 
 const (
-	GoClubAPI_Ping_FullMethodName = "/goclub.engine.v1.GoClubAPI/Ping"
+	Club_Ping_FullMethodName = "/goclub.engine.v1.Club/Ping"
 )
 
-// GoClubAPIClient is the client API for GoClubAPI service.
+// ClubClient is the client API for Club service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type GoClubAPIClient interface {
+type ClubClient interface {
 	Ping(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*PingResponse, error)
 }
 
-type goClubAPIClient struct {
+type clubClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewGoClubAPIClient(cc grpc.ClientConnInterface) GoClubAPIClient {
-	return &goClubAPIClient{cc}
+func NewClubClient(cc grpc.ClientConnInterface) ClubClient {
+	return &clubClient{cc}
 }
 
-func (c *goClubAPIClient) Ping(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*PingResponse, error) {
+func (c *clubClient) Ping(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*PingResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(PingResponse)
-	err := c.cc.Invoke(ctx, GoClubAPI_Ping_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, Club_Ping_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// GoClubAPIServer is the server API for GoClubAPI service.
-// All implementations must embed UnimplementedGoClubAPIServer
+// ClubServer is the server API for Club service.
+// All implementations must embed UnimplementedClubServer
 // for forward compatibility
-type GoClubAPIServer interface {
+type ClubServer interface {
 	Ping(context.Context, *emptypb.Empty) (*PingResponse, error)
-	mustEmbedUnimplementedGoClubAPIServer()
+	mustEmbedUnimplementedClubServer()
 }
 
-// UnimplementedGoClubAPIServer must be embedded to have forward compatible implementations.
-type UnimplementedGoClubAPIServer struct {
+// UnimplementedClubServer must be embedded to have forward compatible implementations.
+type UnimplementedClubServer struct {
 }
 
-func (UnimplementedGoClubAPIServer) Ping(context.Context, *emptypb.Empty) (*PingResponse, error) {
+func (UnimplementedClubServer) Ping(context.Context, *emptypb.Empty) (*PingResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Ping not implemented")
 }
-func (UnimplementedGoClubAPIServer) mustEmbedUnimplementedGoClubAPIServer() {}
+func (UnimplementedClubServer) mustEmbedUnimplementedClubServer() {}
 
-// UnsafeGoClubAPIServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to GoClubAPIServer will
+// UnsafeClubServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to ClubServer will
 // result in compilation errors.
-type UnsafeGoClubAPIServer interface {
-	mustEmbedUnimplementedGoClubAPIServer()
+type UnsafeClubServer interface {
+	mustEmbedUnimplementedClubServer()
 }
 
-func RegisterGoClubAPIServer(s grpc.ServiceRegistrar, srv GoClubAPIServer) {
-	s.RegisterService(&GoClubAPI_ServiceDesc, srv)
+func RegisterClubServer(s grpc.ServiceRegistrar, srv ClubServer) {
+	s.RegisterService(&Club_ServiceDesc, srv)
 }
 
-func _GoClubAPI_Ping_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Club_Ping_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(emptypb.Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(GoClubAPIServer).Ping(ctx, in)
+		return srv.(ClubServer).Ping(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: GoClubAPI_Ping_FullMethodName,
+		FullMethod: Club_Ping_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(GoClubAPIServer).Ping(ctx, req.(*emptypb.Empty))
+		return srv.(ClubServer).Ping(ctx, req.(*emptypb.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// GoClubAPI_ServiceDesc is the grpc.ServiceDesc for GoClubAPI service.
+// Club_ServiceDesc is the grpc.ServiceDesc for Club service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var GoClubAPI_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "goclub.engine.v1.GoClubAPI",
-	HandlerType: (*GoClubAPIServer)(nil),
+var Club_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "goclub.engine.v1.Club",
+	HandlerType: (*ClubServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "Ping",
-			Handler:    _GoClubAPI_Ping_Handler,
+			Handler:    _Club_Ping_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

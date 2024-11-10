@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"goclub/common/logger"
 	"goclub/engine/internal/config"
-	"goclub/engine/internal/controller"
 	grpcserver "goclub/engine/internal/grpc_server"
 	httpserver "goclub/engine/internal/http_server"
+	"goclub/engine/internal/server"
 	"goclub/engine/internal/service"
 	"os"
 	"os/signal"
@@ -26,12 +26,26 @@ type StarterStoper interface {
 	Stop() error
 }
 
+type StartStopInfo struct {
+	title string
+	cargo StarterStoper
+}
+
+type AppService interface {
+	APIServers() []server.APIServer
+}
+
 type (
 	app struct {
 		//Providers, Adapters and Services
-		controller controller.Controller
-		appSvc     service.AppService
-		grpcSvc    grpcserver.GRPCService
+		controller   service.AppService
+		appSvc       server.AppServer
+		errGrp       *errgroup.Group
+		errGrpCtx    context.Context
+		chStartStops chan StartStopInfo
+		grpcSrv      grpcserver.GRPCServer
+		httpSrv      httpserver.HTTPServer
+		cancelFunc   context.CancelFunc
 	}
 )
 
@@ -39,78 +53,82 @@ func NewApp() app {
 	return app{}
 }
 
-func (a *app) Controller(ctc context.Context) controller.Controller {
+// Controller внутренний контролер логики
+func (a *app) Controller(ctc context.Context) service.AppService {
 	if a.controller == nil {
-		a.controller = controller.NewController()
+		a.controller = service.NewService()
 	}
 	return a.controller
 }
 
-func (a *app) AppService(ctx context.Context) service.AppService {
+// AppService основной сервис приложения
+func (a *app) AppService(ctx context.Context) server.AppServer {
 	if a.appSvc == nil {
-		a.appSvc = service.NewAPI(a.Controller(ctx))
+		a.appSvc = server.NewAppServer(a.Controller(ctx))
 	}
 	return a.appSvc
 }
 
-func (a *app) Run(ctx context.Context, cfg *config.AppConfig) error {
+// runComponents запускает с работу компоненты системы с возможностью остановки по отмене контекста
+func (a *app) runComponents(ctx context.Context) {
+	logger.Debug(ctx, "runComponents ends")
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case ssi := <-a.chStartStops:
+			a.errGrp.Go(func() error {
+				logger.Info(ctx, ssi.title+" - Launch component")
+				err := ssi.cargo.Start()
+				logger.Info(ctx, ssi.title+" - Component stopped", "error", err)
+				a.cancelFunc()
+				return err
+			})
+			a.errGrp.Go(func() error {
+				<-a.errGrpCtx.Done()
+				logger.Info(ctx, ssi.title+" - Shutdowning")
+				if err := ssi.cargo.Stop(); err != nil {
+					return fmt.Errorf(ssi.title+" - shutdown error: %w", err)
+				}
+				return nil
+			})
+
+		}
+	}
+}
+
+func (a *app) Run(ctx context.Context, cfg *config.AppConfig) (err error) {
 	const fnName = "Run"
 	logger.Debug(ctx, fmt.Sprintf(pkgName+fnName+": cfg=%v", *cfg))
-	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
-	defer cancel()
 
-	g, gCtx := errgroup.WithContext(ctx)
+	//Создаем контекст с отменой по прерыванию со стороны ОС
+	ctx, a.cancelFunc = signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer a.cancelFunc()
 
-	// Grpc Server >>>
-	grpcSrv := grpcserver.NewGRPCServer(ctx, cfg.GRPCAddress)
-	grpcSrv.RegisterAPI([]grpcserver.GRPCService{a.AppService(ctx)})
+	//Создаем "группу контроля работы" errgroup.Group и констекст для остановки смежных процессов
+	a.errGrp, a.errGrpCtx = errgroup.WithContext(ctx)
+	a.chStartStops = make(chan StartStopInfo, 10)
+	defer close(a.chStartStops)
+	go a.runComponents(ctx)
 
-	g.Go(func() error {
-		err := grpcSrv.Start()
-		logger.Info(ctx, pkgName+fnName+" - service ends", "error", err)
-		cancel()
-		return err
-	})
-	g.Go(func() error {
-		<-gCtx.Done()
-		logger.Info(ctx, pkgName+fnName+" - gPRC server shutdown!")
-		if err := grpcSrv.Stop(); err != nil {
-			return fmt.Errorf(pkgName+fnName+" - gPRC server shutdown error: %w", err)
+	// Создаем и запускаем gRPC-сервер
+	a.grpcSrv = grpcserver.NewGRPCServer(ctx, cfg.GRPCAddress)
+	apiServers := a.AppService(ctx).GRPCServers()
+	a.grpcSrv.RegisterAPI(apiServers)
+	a.chStartStops <- StartStopInfo{cargo: a.grpcSrv, title: "gRPC server"}
+
+	// Создаем и запускаем HTTP-сервер
+	/*
+		if a.httpSrv, err = httpserver.NewServer(ctx, cfg.HTTPAddress, cfg.GRPCAddress); err != nil {
+			return fmt.Errorf(pkgName+fnName+" - httpserver.NewServer fail: %w", err)
 		}
-		return grpcSrv.Stop()
-	})
-	// <<< gRPC Server
-
-	// Http Server >>>
-	httpSrv, err := httpserver.NewServer(ctx, cfg.HTTPAddress, cfg.GRPCAddress)
-	if err != nil {
-		logger.Error(ctx, pkgName+fnName+" - httpserver.NewServer fail", err)
-		cancel()
-	}
-	err = httpSrv.RegisterAPI([]httpserver.HTTPService{a.AppService(ctx)})
-	if err != nil {
-		logger.Error(ctx, pkgName+fnName+" - httpserver.RegisterAPI fail", err)
-		cancel()
-	}
-
-	g.Go(func() error {
-		defer cancel()
-		if err := httpSrv.Start(); err != nil {
-			return fmt.Errorf(pkgName+fnName+" - httpServer ends: %w", err)
+		if err = a.httpSrv.RegisterAPI([]httpserver.HTTPRegistrar{a.AppService(ctx)}); err != nil {
+			return fmt.Errorf(pkgName+fnName+" - httpserver.RegisterAPI fail: %w", err)
 		}
-		return nil
-	})
-
-	g.Go(func() error {
-		<-gCtx.Done()
-		logger.Info(ctx, pkgName+fnName+" - HTTP server shutdown!")
-		if err := httpSrv.Stop(); err != nil {
-			return fmt.Errorf(pkgName+fnName+" - HTTP server shutdown error: %w", err)
-		}
-		return nil
-	})
-	// <<< Http Server
+		a.chStartStops <- StartStopInfo{cargo: a.httpSrv, title: "HTTP server"}
+	*/
 
 	logger.Info(ctx, "Application started")
-	return g.Wait()
+
+	return a.errGrp.Wait()
 }

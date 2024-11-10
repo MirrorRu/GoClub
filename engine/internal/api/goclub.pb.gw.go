@@ -32,7 +32,7 @@ var _ = runtime.String
 var _ = utilities.NewDoubleArray
 var _ = metadata.Join
 
-func request_GoClubAPI_Ping_0(ctx context.Context, marshaler runtime.Marshaler, client GoClubAPIClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func request_Club_Ping_0(ctx context.Context, marshaler runtime.Marshaler, client ClubClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq emptypb.Empty
 	var metadata runtime.ServerMetadata
 
@@ -41,7 +41,7 @@ func request_GoClubAPI_Ping_0(ctx context.Context, marshaler runtime.Marshaler, 
 
 }
 
-func local_request_GoClubAPI_Ping_0(ctx context.Context, marshaler runtime.Marshaler, server GoClubAPIServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func local_request_Club_Ping_0(ctx context.Context, marshaler runtime.Marshaler, server ClubServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq emptypb.Empty
 	var metadata runtime.ServerMetadata
 
@@ -50,13 +50,13 @@ func local_request_GoClubAPI_Ping_0(ctx context.Context, marshaler runtime.Marsh
 
 }
 
-// RegisterGoClubAPIHandlerServer registers the http handlers for service GoClubAPI to "mux".
-// UnaryRPC     :call GoClubAPIServer directly.
+// RegisterClubHandlerServer registers the http handlers for service Club to "mux".
+// UnaryRPC     :call ClubServer directly.
 // StreamingRPC :currently unsupported pending https://github.com/grpc/grpc-go/issues/906.
-// Note that using this registration option will cause many gRPC library features to stop working. Consider using RegisterGoClubAPIHandlerFromEndpoint instead.
-func RegisterGoClubAPIHandlerServer(ctx context.Context, mux *runtime.ServeMux, server GoClubAPIServer) error {
+// Note that using this registration option will cause many gRPC library features to stop working. Consider using RegisterClubHandlerFromEndpoint instead.
+func RegisterClubHandlerServer(ctx context.Context, mux *runtime.ServeMux, server ClubServer) error {
 
-	mux.Handle("GET", pattern_GoClubAPI_Ping_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_Club_Ping_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
@@ -64,12 +64,12 @@ func RegisterGoClubAPIHandlerServer(ctx context.Context, mux *runtime.ServeMux, 
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/goclub.engine.v1.GoClubAPI/Ping", runtime.WithHTTPPathPattern("/api/v1/ping"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/goclub.engine.v1.Club/Ping", runtime.WithHTTPPathPattern("/api/v1/ping"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_GoClubAPI_Ping_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_Club_Ping_0(annotatedContext, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
 		if err != nil {
@@ -77,16 +77,16 @@ func RegisterGoClubAPIHandlerServer(ctx context.Context, mux *runtime.ServeMux, 
 			return
 		}
 
-		forward_GoClubAPI_Ping_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_Club_Ping_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
 	return nil
 }
 
-// RegisterGoClubAPIHandlerFromEndpoint is same as RegisterGoClubAPIHandler but
+// RegisterClubHandlerFromEndpoint is same as RegisterClubHandler but
 // automatically dials to "endpoint" and closes the connection when "ctx" gets done.
-func RegisterGoClubAPIHandlerFromEndpoint(ctx context.Context, mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) (err error) {
+func RegisterClubHandlerFromEndpoint(ctx context.Context, mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) (err error) {
 	conn, err := grpc.NewClient(endpoint, opts...)
 	if err != nil {
 		return err
@@ -106,41 +106,41 @@ func RegisterGoClubAPIHandlerFromEndpoint(ctx context.Context, mux *runtime.Serv
 		}()
 	}()
 
-	return RegisterGoClubAPIHandler(ctx, mux, conn)
+	return RegisterClubHandler(ctx, mux, conn)
 }
 
-// RegisterGoClubAPIHandler registers the http handlers for service GoClubAPI to "mux".
+// RegisterClubHandler registers the http handlers for service Club to "mux".
 // The handlers forward requests to the grpc endpoint over "conn".
-func RegisterGoClubAPIHandler(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error {
-	return RegisterGoClubAPIHandlerClient(ctx, mux, NewGoClubAPIClient(conn))
+func RegisterClubHandler(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error {
+	return RegisterClubHandlerClient(ctx, mux, NewClubClient(conn))
 }
 
-// RegisterGoClubAPIHandlerClient registers the http handlers for service GoClubAPI
-// to "mux". The handlers forward requests to the grpc endpoint over the given implementation of "GoClubAPIClient".
-// Note: the gRPC framework executes interceptors within the gRPC handler. If the passed in "GoClubAPIClient"
+// RegisterClubHandlerClient registers the http handlers for service Club
+// to "mux". The handlers forward requests to the grpc endpoint over the given implementation of "ClubClient".
+// Note: the gRPC framework executes interceptors within the gRPC handler. If the passed in "ClubClient"
 // doesn't go through the normal gRPC flow (creating a gRPC client etc.) then it will be up to the passed in
-// "GoClubAPIClient" to call the correct interceptors.
-func RegisterGoClubAPIHandlerClient(ctx context.Context, mux *runtime.ServeMux, client GoClubAPIClient) error {
+// "ClubClient" to call the correct interceptors.
+func RegisterClubHandlerClient(ctx context.Context, mux *runtime.ServeMux, client ClubClient) error {
 
-	mux.Handle("GET", pattern_GoClubAPI_Ping_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("GET", pattern_Club_Ping_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/goclub.engine.v1.GoClubAPI/Ping", runtime.WithHTTPPathPattern("/api/v1/ping"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/goclub.engine.v1.Club/Ping", runtime.WithHTTPPathPattern("/api/v1/ping"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_GoClubAPI_Ping_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Club_Ping_0(annotatedContext, inboundMarshaler, client, req, pathParams)
 		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
 		if err != nil {
 			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_GoClubAPI_Ping_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_Club_Ping_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -148,9 +148,9 @@ func RegisterGoClubAPIHandlerClient(ctx context.Context, mux *runtime.ServeMux, 
 }
 
 var (
-	pattern_GoClubAPI_Ping_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "v1", "ping"}, ""))
+	pattern_Club_Ping_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "v1", "ping"}, ""))
 )
 
 var (
-	forward_GoClubAPI_Ping_0 = runtime.ForwardResponseMessage
+	forward_Club_Ping_0 = runtime.ForwardResponseMessage
 )

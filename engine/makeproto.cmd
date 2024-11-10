@@ -8,6 +8,6 @@ protoc ^
 	--openapiv2_out=./internal/api ^
 	-I proto ^
 	-I vendor/proto ^
-	proto/goclub.proto 
+	proto/*.proto 
 
 @echo Done

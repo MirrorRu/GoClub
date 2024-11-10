@@ -1,0 +1,321 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "members.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "Members"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/api/v1/members": {
+      "get": {
+        "operationId": "Members_MemberListing",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1MemberListingResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "filter.fullNamePart",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Members"
+        ]
+      },
+      "post": {
+        "operationId": "Members_MemberCreate",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1MemberCreateResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1MemberCreateRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Members"
+        ]
+      }
+    },
+    "/api/v1/members/{memberId}": {
+      "get": {
+        "operationId": "Members_MemberRead",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1MemberReadResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "memberId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "Members"
+        ]
+      },
+      "delete": {
+        "operationId": "Members_MemberDelete",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1MemberDeleteResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "memberId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "Members"
+        ]
+      }
+    },
+    "/api/v1/members/{object.memberId}": {
+      "put": {
+        "operationId": "Members_MemberUpdate",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1MemberUpdateResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "object.memberId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/MembersMemberUpdateBody"
+            }
+          }
+        ],
+        "tags": [
+          "Members"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "MemberListingRequestListingFilter": {
+      "type": "object",
+      "properties": {
+        "fullNamePart": {
+          "type": "string"
+        }
+      }
+    },
+    "MembersMemberUpdateBody": {
+      "type": "object",
+      "properties": {
+        "object": {
+          "type": "object",
+          "properties": {
+            "fullName": {
+              "type": "string"
+            },
+            "birthday": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        }
+      }
+    },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    },
+    "v1CRUDResult": {
+      "type": "object",
+      "properties": {
+        "rowsAffected": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "v1MemberCreateRequest": {
+      "type": "object",
+      "properties": {
+        "object": {
+          "$ref": "#/definitions/v1MemberInfo"
+        }
+      }
+    },
+    "v1MemberCreateResponse": {
+      "type": "object",
+      "properties": {
+        "crudResult": {
+          "$ref": "#/definitions/v1CRUDResult"
+        },
+        "memberId": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
+    "v1MemberDeleteResponse": {
+      "type": "object",
+      "properties": {
+        "crudResult": {
+          "$ref": "#/definitions/v1CRUDResult"
+        }
+      }
+    },
+    "v1MemberInfo": {
+      "type": "object",
+      "properties": {
+        "memberId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "fullName": {
+          "type": "string"
+        },
+        "birthday": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "v1MemberListingResponse": {
+      "type": "object",
+      "properties": {
+        "crudResult": {
+          "$ref": "#/definitions/v1CRUDResult"
+        },
+        "objects": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1MemberInfo"
+          }
+        }
+      }
+    },
+    "v1MemberReadResponse": {
+      "type": "object",
+      "properties": {
+        "crudResult": {
+          "$ref": "#/definitions/v1CRUDResult"
+        },
+        "object": {
+          "$ref": "#/definitions/v1MemberInfo"
+        }
+      }
+    },
+    "v1MemberUpdateResponse": {
+      "type": "object",
+      "properties": {
+        "crudResult": {
+          "$ref": "#/definitions/v1CRUDResult"
+        }
+      }
+    }
+  }
+}

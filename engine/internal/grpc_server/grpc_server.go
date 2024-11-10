@@ -11,35 +11,36 @@ import (
 
 const pkgLogName = "grpcServer"
 
-// type AppService interface {
-// 	RegisterGrpcServer(server *grpc.Server)
-// 	RegisterHttpServer(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error
-// }
-
-type GRPCService interface {
+type GRPCRegistrar interface {
 	RegisterGrpcServer(server *grpc.Server)
 }
 
-type grpcServer struct {
+type GRPCServer interface {
+	Start() error
+	Stop() error
+	RegisterAPI(api []GRPCRegistrar)
+}
+
+type server struct {
 	ctx    context.Context
 	addr   string
 	server *grpc.Server
 }
 
-func NewGRPCServer(ctx context.Context, port string) *grpcServer {
+func NewGRPCServer(ctx context.Context, port string) *server {
 
 	srv := grpc.NewServer()
 
 	reflection.Register(srv)
 
-	return &grpcServer{
+	return &server{
 		ctx:    ctx,
 		addr:   port,
 		server: srv,
 	}
 }
 
-func (s *grpcServer) Start() error {
+func (s *server) Start() error {
 	const fnLogName = ".Start"
 	listner, err := net.Listen("tcp", s.addr)
 	if err != nil {
@@ -54,12 +55,12 @@ func (s *grpcServer) Start() error {
 	return nil
 }
 
-func (s *grpcServer) Stop() error {
+func (s *server) Stop() error {
 	s.server.GracefulStop()
 	return nil
 }
 
-func (s *grpcServer) RegisterAPI(services []GRPCService) {
+func (s *server) RegisterAPI(services []GRPCRegistrar) {
 	for _, svc := range services {
 		svc.RegisterGrpcServer(s.server)
 	}

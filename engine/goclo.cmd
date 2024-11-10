@@ -17,7 +17,6 @@ cd ../..
 rmdir /S /Q vendor\proto\goolge\api
 move temp\googleapis.tmp\google\api vendor\proto\google
 
-:next
 @REM https://github.com/grpc-ecosystem/grpc-gateway
 rmdir /S /Q temp\grpc-gateway.tmp
 git clone --depth 1 --no-checkout https://github.com/grpc-ecosystem/grpc-gateway temp/grpc-gateway.tmp
@@ -27,4 +26,13 @@ cd ../..
 rmdir /S /Q vendor\proto\protoc-gen-openapiv2
 move temp\grpc-gateway.tmp\protoc-gen-openapiv2 vendor\proto
 
+:next
+@REM https://github.com/bufbuild/protoc-gen-validate
+rmdir /S /Q temp\protoc-gen-validate.tmp
+git clone --depth 1 --no-checkout https://github.com/bufbuild/protoc-gen-validate temp/protoc-gen-validate.tmp
+cd temp/protoc-gen-validate.tmp
+git checkout HEAD -- validate/*.proto
+cd ../..
+rmdir /S /Q vendor\proto\protoc-gen-validate
+move temp\protoc-gen-validate.tmp\validate vendor\proto
 

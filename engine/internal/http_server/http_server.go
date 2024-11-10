@@ -20,14 +20,14 @@ import (
 
 const pkgLogName = "httpServer"
 
-type HTTPService interface {
+type HTTPRegistrar interface {
 	RegisterHttpServer(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error
 }
 
-type Server interface {
+type HTTPServer interface {
 	Start() error
 	Stop() error
-	RegisterAPI(api []HTTPService) error
+	RegisterAPI(api []HTTPRegistrar) error
 }
 
 type server struct {
@@ -38,7 +38,7 @@ type server struct {
 	httpServer *http.Server
 }
 
-func NewServer(ctx context.Context, httpAddr, grpcAddr string) (Server, error) {
+func NewServer(ctx context.Context, httpAddr, grpcAddr string) (HTTPServer, error) {
 	const fnLogName = ".NewServer"
 	var err error
 
@@ -118,7 +118,7 @@ func (s *server) Stop() error {
 	return s.httpServer.Shutdown(ctx)
 }
 
-func (s *server) RegisterAPI(api []HTTPService) error {
+func (s *server) RegisterAPI(api []HTTPRegistrar) error {
 	for _, singleAPI := range api {
 		err := singleAPI.RegisterHttpServer(s.ctx, s.gwmux, s.conn)
 		if err != nil {

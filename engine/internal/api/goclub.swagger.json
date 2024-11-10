@@ -6,7 +6,7 @@
   },
   "tags": [
     {
-      "name": "GoClubAPI"
+      "name": "Club"
     }
   ],
   "schemes": [
@@ -22,7 +22,7 @@
   "paths": {
     "/api/v1/ping": {
       "get": {
-        "operationId": "GoClubAPI_Ping",
+        "operationId": "Club_Ping",
         "responses": {
           "200": {
             "description": "A successful response.",
@@ -45,7 +45,7 @@
           }
         },
         "tags": [
-          "GoClubAPI"
+          "Club"
         ]
       }
     }
