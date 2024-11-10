@@ -6,7 +6,8 @@ import (
 	"goclub/engine/internal/api"
 	"goclub/engine/internal/service"
 
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+
 	"google.golang.org/grpc"
 )
 

@@ -11,14 +11,14 @@ import (
 
 const pkgLogName = "grpcServer"
 
-type GRPCRegistrar interface {
+type GRPCAPI interface {
 	RegisterGrpcServer(server *grpc.Server)
 }
 
 type GRPCServer interface {
 	Start() error
 	Stop() error
-	RegisterAPI(api []GRPCRegistrar)
+	RegisterAPI(api []GRPCAPI)
 }
 
 type server struct {
@@ -60,7 +60,7 @@ func (s *server) Stop() error {
 	return nil
 }
 
-func (s *server) RegisterAPI(services []GRPCRegistrar) {
+func (s *server) RegisterAPI(services []GRPCAPI) {
 	for _, svc := range services {
 		svc.RegisterGrpcServer(s.server)
 	}
