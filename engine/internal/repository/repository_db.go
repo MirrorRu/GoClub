@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"goclub/engine/internal/config"
+	"goclub/engine/internal/repository/db"
 	membersrepo "goclub/engine/internal/repository/members_repo"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
@@ -15,8 +16,8 @@ const dbDriver = "pgx"
 type pgDBRepo struct {
 	membersrepo.MembersRepo
 	dbDSN  config.DBDSN
-	writer *sql.DB
-	reader *sql.DB
+	writer db.DbHandler
+	reader db.DbHandler
 }
 
 func NewPgDBRepo(dbdsn config.DBDSN) *pgDBRepo {
@@ -26,27 +27,31 @@ func NewPgDBRepo(dbdsn config.DBDSN) *pgDBRepo {
 }
 
 func (repo *pgDBRepo) Open() (err error) {
-	if repo.writer, err = sql.Open(dbDriver, repo.dbDSN.Master); err != nil {
+	var dbMaster, dbSlave *sql.DB
+	if dbMaster, err = sql.Open(dbDriver, repo.dbDSN.Master); err != nil {
 		return fmt.Errorf("MasterDSN Open failed: %w", err)
 	}
-
-	if err = repo.writer.Ping(); err != nil {
+	if err = dbMaster.Ping(); err != nil {
 		return fmt.Errorf("MasterDNS Ping failed: %w", err)
 	}
 
-	if repo.reader, err = sql.Open(dbDriver, repo.dbDSN.Slave); err != nil {
+	if dbSlave, err = sql.Open(dbDriver, repo.dbDSN.Slave); err != nil {
 		return errors.Join(
 			fmt.Errorf("SlaveDSN Open failed: %w", err),
-			repo.writer.Close(),
+			dbMaster.Close(),
 		)
 	}
 
-	if err = repo.reader.Ping(); err != nil {
+	if err = dbSlave.Ping(); err != nil {
 		return errors.Join(
 			fmt.Errorf("SlaveDSN Open failed: %w", err),
-			repo.writer.Close(),
+			dbMaster.Close(),
+			dbSlave.Close(),
 		)
 	}
+
+	repo.writer = db.NewDbHandler(dbMaster)
+	repo.reader = db.NewDbHandler(dbSlave)
 
 	repo.MembersRepo = membersrepo.NewMembersDbRepo(repo.writer, repo.reader)
 	return nil

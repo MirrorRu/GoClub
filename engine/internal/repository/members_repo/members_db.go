@@ -2,17 +2,20 @@ package membersrepo
 
 import (
 	"database/sql"
+	"goclub/engine/internal/repository/db"
 	"goclub/model/members"
 )
 
 type (
 	membersDbRepo struct {
-		writeHandle *sql.DB
-		readHandle  *sql.DB
+		writeHandle db.DbHandler
+		writeStmt   map[string]sql.Stmt
+		readHandle  db.DbHandler
+		readStmt    map[string]sql.Stmt
 	}
 )
 
-func NewMembersDbRepo(writeHandle *sql.DB, readHandle *sql.DB) *membersDbRepo {
+func NewMembersDbRepo(writeHandle db.DbHandler, readHandle db.DbHandler) *membersDbRepo {
 	return &membersDbRepo{
 		writeHandle: writeHandle,
 		readHandle:  readHandle,

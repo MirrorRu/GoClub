@@ -104,7 +104,7 @@ func (a *app) Run(ctx context.Context, cfg *config.AppConfig) (err error) {
 	ctx, a.cancelFunc = signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer a.cancelFunc()
 
-	a.AppServer(ctx) // Инициализаруем объекты по цепочке Server-Service-Repo-...
+	a.AppServer(ctx) // Инициализируем объекты по цепочке Server-Service-Repo-...
 
 	//Создаем "группу контроля работы" errgroup.Group и констекст для остановки смежных процессов
 	a.errGrp, a.errGrpCtx = errgroup.WithContext(ctx)
