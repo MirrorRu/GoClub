@@ -12,18 +12,18 @@ type CRUDResult[T any] struct {
 	Data  T
 }
 
-type CRUDRepo[DataType any, KeyType any] interface {
-	MemberCreate(ctx context.Context, data DataType) (result CRUDResult[DataType])
-	MemberUpdate(ctx context.Context, data DataType) (result CRUDResult[DataType])
-	MemberDelete(ctx context.Context, key KeyType) (result CRUDResult[struct{}])
-	MemberRead(ctx context.Context, key KeyType) (result CRUDResult[DataType])
-	MemberList(ctx context.Context, filter any) (result CRUDResult[[]DataType])
-}
-
-type CRUDService[DataType any, KeyType any] interface {
-	Read(ctx context.Context, key KeyType) (result CRUDResult[DataType])
+type CRUDRepo[DataType any] interface {
 	Create(ctx context.Context, data DataType) (result CRUDResult[DataType])
 	Update(ctx context.Context, data DataType) (result CRUDResult[DataType])
-	Delete(ctx context.Context, key KeyType) (result CRUDResult[struct{}])
+	Delete(ctx context.Context, keys ...any) (result CRUDResult[struct{}])
+	Read(ctx context.Context, keys ...any) (result CRUDResult[DataType])
+	List(ctx context.Context, filter any) (result CRUDResult[[]DataType])
+}
+
+type CRUDService[DataType any] interface {
+	Create(ctx context.Context, data DataType) (result CRUDResult[DataType])
+	Update(ctx context.Context, data DataType) (result CRUDResult[DataType])
+	Delete(ctx context.Context, keys ...any) (result CRUDResult[struct{}])
+	Read(ctx context.Context, keys ...any) (result CRUDResult[DataType])
 	Listing(ctx context.Context, filter any) (result CRUDResult[[]DataType])
 }

@@ -6,7 +6,6 @@ import (
 	"goclub/engine/internal/api"
 	"goclub/engine/internal/service"
 	"goclub/engine/repack"
-	"goclub/model/members"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 
@@ -67,7 +66,7 @@ func (srv *memberServer) MemberUpdate(ctx context.Context, req *api.MemberUpdate
 }
 
 func (srv *memberServer) MemberDelete(ctx context.Context, req *api.MemberDeleteRequest) (resp *api.MemberDeleteResponse, err error) {
-	crudRes := srv.actor.Members().Delete(ctx, members.ID(req.GetId()))
+	crudRes := srv.actor.Members().Delete(ctx, req.GetId())
 	if crudRes.Error != nil {
 		return nil, crudRes.Error
 	}
@@ -92,7 +91,7 @@ func (srv *memberServer) MemberListing(ctx context.Context, req *api.MemberListi
 }
 
 func (srv *memberServer) MemberRead(ctx context.Context, req *api.MemberReadRequest) (resp *api.MemberReadResponse, err error) {
-	crudRes := srv.actor.Members().Read(ctx, members.ID(req.GetId()))
+	crudRes := srv.actor.Members().Read(ctx, req.GetId())
 	if crudRes.Error != nil {
 		return nil, crudRes.Error
 	}

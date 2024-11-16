@@ -7,6 +7,7 @@ import (
 	"goclub/engine/internal/config"
 	"goclub/engine/internal/repository/db"
 	membersrepo "goclub/engine/internal/repository/members_repo"
+	"goclub/model/members"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
@@ -53,7 +54,8 @@ func (repo *pgDBRepo) Open() (err error) {
 	repo.writer = db.NewDbHandler(dbMaster)
 	repo.reader = db.NewDbHandler(dbSlave)
 
-	repo.MembersRepo = membersrepo.NewMembersDbRepo(repo.writer, repo.reader)
+	//repo.MembersRepo = membersrepo.NewMembersDbRepo(repo.writer, repo.reader)
+	repo.MembersRepo = db.NewDictBaseDbRepo[members.Member](repo.writer, repo.reader)
 	return nil
 }
 
@@ -73,4 +75,8 @@ func (repo *pgDBRepo) Close() (err error) {
 
 	return errors.Join(errWriter, errReader)
 
+}
+
+func (repo *pgDBRepo) Members() membersrepo.MembersRepo {
+	return repo.MembersRepo
 }

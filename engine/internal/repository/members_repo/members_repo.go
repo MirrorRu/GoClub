@@ -7,6 +7,6 @@ import (
 
 type (
 	MembersRepo interface {
-		common.CRUDRepo[*members.Member, members.ID]
+		common.CRUDRepo[*members.Member]
 	}
 )

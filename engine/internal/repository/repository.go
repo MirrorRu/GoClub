@@ -15,5 +15,5 @@ type RepoOpenCloser interface {
 
 type Repository interface {
 	RepoOpenCloser
-	membersrepo.MembersRepo
+	Members() membersrepo.MembersRepo
 }
