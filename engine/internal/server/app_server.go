@@ -13,12 +13,12 @@ const pkgName = "api"
 
 type APIServer interface {
 	grpcserver.GRPCAPI
-	httpserver.HTTPAPIs
+	httpserver.HTTPAPI
 }
 
 type AppServer interface {
 	GRPCAPIs() []grpcserver.GRPCAPI
-	HTTPAPIs() []httpserver.HTTPAPIs
+	HTTPAPIs() []httpserver.HTTPAPI
 }
 
 type appServer struct {
@@ -35,18 +35,28 @@ func NewAppServer(controller service.AppService) *appServer {
 	}
 }
 
-func (srv *appServer) GRPCAPIs() []grpcserver.GRPCAPI {
-	return []grpcserver.GRPCAPI{
+func (srv *appServer) APIs() []APIServer {
+	return []APIServer{
 		srv.clubServer,
 		srv.memberServer,
 		srv.roomServer,
 	}
 }
 
-func (srv *appServer) HTTPAPIs() []httpserver.HTTPAPIs {
-	return []httpserver.HTTPAPIs{
-		srv.clubServer,
-		srv.memberServer,
-		srv.roomServer,
+func (srv *appServer) GRPCAPIs() (result []grpcserver.GRPCAPI) {
+	apis := srv.APIs()
+	result = make([]grpcserver.GRPCAPI, len(apis))
+	for idx := range apis {
+		result[idx] = apis[idx]
 	}
+	return result
+}
+
+func (srv *appServer) HTTPAPIs() (result []httpserver.HTTPAPI) {
+	apis := srv.APIs()
+	result = make([]httpserver.HTTPAPI, len(apis))
+	for idx := range apis {
+		result[idx] = apis[idx]
+	}
+	return result
 }

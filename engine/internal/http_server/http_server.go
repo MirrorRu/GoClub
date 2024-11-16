@@ -20,14 +20,14 @@ import (
 
 const pkgLogName = "httpServer"
 
-type HTTPAPIs interface {
+type HTTPAPI interface {
 	RegisterHttpServer(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error
 }
 
 type HTTPServer interface {
 	Start() error
 	Stop() error
-	RegisterAPI(api []HTTPAPIs) error
+	RegisterAPI(api []HTTPAPI) error
 }
 
 type server struct {
@@ -118,7 +118,7 @@ func (s *server) Stop() error {
 	return s.httpServer.Shutdown(ctx)
 }
 
-func (s *server) RegisterAPI(api []HTTPAPIs) error {
+func (s *server) RegisterAPI(api []HTTPAPI) error {
 	for _, singleAPI := range api {
 		err := singleAPI.RegisterHttpServer(s.ctx, s.gwmux, s.conn)
 		if err != nil {
