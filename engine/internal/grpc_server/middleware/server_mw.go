@@ -6,6 +6,7 @@ import (
 	"goclub/common/logger"
 	"log"
 	"net/http"
+	"runtime/debug"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -61,7 +62,7 @@ func Panic(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, han
 	const fnLogName = ".Panic"
 	defer func() {
 		if e := recover(); e != nil {
-			logger.Error(ctx, fmt.Sprintf(pkgLogName+fnLogName+" - panic: %v", e), nil)
+			logger.Error(ctx, fmt.Sprintf(pkgLogName+fnLogName+" - panic: %v\n%s", e, string(debug.Stack())), nil)
 			err = status.Errorf(codes.Internal, pkgLogName+fnLogName+" - panic: %v", e)
 		}
 	}()

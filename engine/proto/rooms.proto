@@ -1,0 +1,101 @@
+syntax = "proto3";
+
+package goclub.engine.v1;
+
+import "google/protobuf/empty.proto";
+import "google/api/annotations.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+import "validate/validate.proto";
+//import "google/protobuf/timestamp.proto";
+import "common.proto";
+
+option go_package = "goclub/engine/v1;api";
+
+
+service Rooms {
+        rpc RoomCreate(RoomCreateRequest) returns (RoomCreateResponse)  {
+            option (google.api.http) = {
+                post: "/api/v1/rooms"
+                body: "*"
+            };
+        }
+    
+        rpc RoomUpdate(RoomUpdateRequest) returns (RoomUpdateResponse) {
+            option (google.api.http) = {
+                put: "/api/v1/rooms/{object.id}"
+                body: "*"
+            };
+        }
+    
+        rpc RoomDelete(RoomDeleteRequest) returns (RoomDeleteResponse)  {
+            option (google.api.http) = {
+                delete: "/api/v1/rooms/{id}"
+            };
+        }
+    
+        rpc RoomRead(RoomReadRequest) returns (RoomReadResponse)  {
+            option (google.api.http) = {
+                get: "/api/v1/rooms/{id}"
+            };
+        }
+        rpc   RoomListing(  RoomListingRequest) returns (  RoomListingResponse)  {
+            option (google.api.http) = {
+                get: "/api/v1/rooms"
+            };
+        }
+    }
+    
+   
+
+    message RoomInfo {
+        int64 id = 1;
+        string Name = 2 [(validate.rules).string.min_len = 2, (validate.rules).string.max_len = 100];
+    }
+    
+    // Creating
+    message RoomCreateRequest {
+        RoomInfo object = 1;
+    }
+    
+    message RoomCreateResponse {
+        CRUDResult crud_result = 1;
+        RoomInfo object = 2;
+    }
+    
+    // Updating
+    message RoomUpdateRequest {
+        RoomInfo object = 1;
+    }
+    
+    message RoomUpdateResponse   {
+        CRUDResult crud_result = 1;
+        RoomInfo object = 2;
+    }
+    
+    // Deleting
+    message RoomDeleteRequest {
+        int64 id = 1;
+    }
+    
+    message RoomDeleteResponse {
+        CRUDResult crud_result = 1;
+    }
+    
+    message RoomReadRequest {
+        int64 id = 1;
+    }
+    
+    message RoomReadResponse {
+        CRUDResult crud_result = 1;
+        RoomInfo object = 2;
+    }
+    
+    message  RoomListingRequest {
+    }
+    
+    message  RoomListingResponse  {
+        CRUDResult crud_result = 1;
+        repeated RoomInfo objects = 2;
+    }
+    
+    

@@ -67,6 +67,53 @@ func (x *Date) GetYyyyMmDd() int32 {
 	return 0
 }
 
+type CRUDResult struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	RowsAffected int64 `protobuf:"varint,1,opt,name=rowsAffected,proto3" json:"rowsAffected,omitempty"`
+}
+
+func (x *CRUDResult) Reset() {
+	*x = CRUDResult{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_common_proto_msgTypes[1]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *CRUDResult) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CRUDResult) ProtoMessage() {}
+
+func (x *CRUDResult) ProtoReflect() protoreflect.Message {
+	mi := &file_common_proto_msgTypes[1]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CRUDResult.ProtoReflect.Descriptor instead.
+func (*CRUDResult) Descriptor() ([]byte, []int) {
+	return file_common_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *CRUDResult) GetRowsAffected() int64 {
+	if x != nil {
+		return x.RowsAffected
+	}
+	return 0
+}
+
 var File_common_proto protoreflect.FileDescriptor
 
 var file_common_proto_rawDesc = []byte{
@@ -74,9 +121,12 @@ var file_common_proto_rawDesc = []byte{
 	0x67, 0x6f, 0x63, 0x6c, 0x75, 0x62, 0x2e, 0x65, 0x6e, 0x67, 0x69, 0x6e, 0x65, 0x2e, 0x76, 0x31,
 	0x22, 0x24, 0x0a, 0x04, 0x44, 0x61, 0x74, 0x65, 0x12, 0x1c, 0x0a, 0x0a, 0x79, 0x79, 0x79, 0x79,
 	0x5f, 0x6d, 0x6d, 0x5f, 0x64, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x08, 0x79, 0x79,
-	0x79, 0x79, 0x4d, 0x6d, 0x44, 0x64, 0x42, 0x16, 0x5a, 0x14, 0x67, 0x6f, 0x63, 0x6c, 0x75, 0x62,
-	0x2f, 0x65, 0x6e, 0x67, 0x69, 0x6e, 0x65, 0x2f, 0x76, 0x31, 0x3b, 0x61, 0x70, 0x69, 0x62, 0x06,
-	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x79, 0x79, 0x4d, 0x6d, 0x44, 0x64, 0x22, 0x30, 0x0a, 0x0a, 0x43, 0x52, 0x55, 0x44, 0x52, 0x65,
+	0x73, 0x75, 0x6c, 0x74, 0x12, 0x22, 0x0a, 0x0c, 0x72, 0x6f, 0x77, 0x73, 0x41, 0x66, 0x66, 0x65,
+	0x63, 0x74, 0x65, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x0c, 0x72, 0x6f, 0x77, 0x73,
+	0x41, 0x66, 0x66, 0x65, 0x63, 0x74, 0x65, 0x64, 0x42, 0x16, 0x5a, 0x14, 0x67, 0x6f, 0x63, 0x6c,
+	0x75, 0x62, 0x2f, 0x65, 0x6e, 0x67, 0x69, 0x6e, 0x65, 0x2f, 0x76, 0x31, 0x3b, 0x61, 0x70, 0x69,
+	0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -91,9 +141,10 @@ func file_common_proto_rawDescGZIP() []byte {
 	return file_common_proto_rawDescData
 }
 
-var file_common_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
+var file_common_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_common_proto_goTypes = []any{
-	(*Date)(nil), // 0: goclub.engine.v1.Date
+	(*Date)(nil),       // 0: goclub.engine.v1.Date
+	(*CRUDResult)(nil), // 1: goclub.engine.v1.CRUDResult
 }
 var file_common_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for method output_type
@@ -121,6 +172,18 @@ func file_common_proto_init() {
 				return nil
 			}
 		}
+		file_common_proto_msgTypes[1].Exporter = func(v any, i int) any {
+			switch v := v.(*CRUDResult); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -128,7 +191,7 @@ func file_common_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_common_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   1,
+			NumMessages:   2,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

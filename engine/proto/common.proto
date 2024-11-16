@@ -7,3 +7,7 @@ option go_package = "goclub/engine/v1;api";
 message Date {
     int32 yyyy_mm_dd = 1;
 }
+
+message CRUDResult {
+    int64 rowsAffected = 1;
+}

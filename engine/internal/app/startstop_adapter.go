@@ -7,25 +7,30 @@ type funcWithErr func() error
 type startStopAdpt struct {
 	ctx      context.Context
 	launcher funcWithErr
-	lander   funcWithErr
+	finisher funcWithErr
 }
 
-func NewStartStopAdpt(ctx context.Context, launcher func() error, lander func() error) *startStopAdpt {
+func NewStartStopAdpt(ctx context.Context, launcher func() error, finisher func() error) *startStopAdpt {
 	return &startStopAdpt{
 		ctx:      ctx,
 		launcher: launcher,
-		lander:   lander,
+		finisher: finisher,
 	}
 }
 
 func (ssa startStopAdpt) Start() error {
-	if err := ssa.launcher(); err != nil {
-		return err
+	if ssa.launcher != nil {
+		if err := ssa.launcher(); err != nil {
+			return err
+		}
 	}
 	<-ssa.ctx.Done()
 	return nil
 }
 
 func (ssa startStopAdpt) Stop() error {
-	return ssa.lander()
+	if ssa.finisher == nil {
+		return nil
+	}
+	return ssa.finisher()
 }

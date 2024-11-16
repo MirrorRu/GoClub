@@ -79,21 +79,25 @@ func (a *app) Repo() repository.Repository {
 
 // runComponents запускает с работу компоненты системы с возможностью остановки по отмене контекста
 func (a *app) runComponent(ctx context.Context, ssi AppComponentInfo) {
-	a.errGrp.Go(func() error {
-		logger.Info(ctx, ssi.title+" - Launch component")
-		err := ssi.cargo.Start()
-		logger.Info(ctx, ssi.title+" - Component stopped", "error", err)
-		a.cancelFunc()
-		return err
-	})
-	a.errGrp.Go(func() error {
-		<-a.errGrpCtx.Done()
-		logger.Info(ctx, ssi.title+" - Shutdowning")
-		if err := ssi.cargo.Stop(); err != nil {
-			return fmt.Errorf(ssi.title+" - shutdown error: %w", err)
-		}
-		return nil
-	})
+	if ssi.cargo.Start != nil {
+		a.errGrp.Go(func() error {
+			logger.Info(ctx, ssi.title+" - Launch component")
+			err := ssi.cargo.Start()
+			logger.Info(ctx, ssi.title+" - Component stopped", "error", err)
+			a.cancelFunc()
+			return err
+		})
+	}
+	if ssi.cargo.Stop != nil {
+		a.errGrp.Go(func() error {
+			<-a.errGrpCtx.Done()
+			logger.Info(ctx, ssi.title+" - Shutdowning")
+			if err := ssi.cargo.Stop(); err != nil {
+				return fmt.Errorf(ssi.title+" - shutdown error: %w", err)
+			}
+			return nil
+		})
+	}
 }
 
 func (a *app) Run(ctx context.Context, cfg *config.AppConfig) (err error) {
@@ -104,13 +108,16 @@ func (a *app) Run(ctx context.Context, cfg *config.AppConfig) (err error) {
 	ctx, a.cancelFunc = signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer a.cancelFunc()
 
-	a.AppServer(ctx) // Инициализируем объекты по цепочке Server-Service-Repo-...
+	//a.AppServer(ctx) // Инициализаруем объекты по цепочке Server-Service-Repo-...
 
+	if err = a.Repo().Open(); err != nil {
+		return err
+	}
 	//Создаем "группу контроля работы" errgroup.Group и констекст для остановки смежных процессов
 	a.errGrp, a.errGrpCtx = errgroup.WithContext(ctx)
 
 	// Запускаем репозиторий
-	repoStartStoper := NewStartStopAdpt(ctx, a.Repo().Open, a.Repo().Close)
+	repoStartStoper := NewStartStopAdpt(ctx, nil, a.Repo().Close)
 	a.runComponent(ctx, AppComponentInfo{cargo: repoStartStoper, title: "Repository"})
 	// <<<
 

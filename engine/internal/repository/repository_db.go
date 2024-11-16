@@ -7,7 +7,9 @@ import (
 	"goclub/engine/internal/config"
 	"goclub/engine/internal/repository/db"
 	membersrepo "goclub/engine/internal/repository/members_repo"
+	roomsrepo "goclub/engine/internal/repository/rooms_repo"
 	"goclub/model/members"
+	"goclub/model/rooms"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
@@ -16,6 +18,7 @@ const dbDriver = "pgx"
 
 type pgDBRepo struct {
 	membersrepo.MembersRepo
+	roomsrepo.RoomsRepo
 	dbDSN  config.DBDSN
 	writer db.DbHandler
 	reader db.DbHandler
@@ -54,8 +57,8 @@ func (repo *pgDBRepo) Open() (err error) {
 	repo.writer = db.NewDbHandler(dbMaster)
 	repo.reader = db.NewDbHandler(dbSlave)
 
-	//repo.MembersRepo = membersrepo.NewMembersDbRepo(repo.writer, repo.reader)
 	repo.MembersRepo = db.NewDictBaseDbRepo[members.Member](repo.writer, repo.reader)
+	repo.RoomsRepo = db.NewDictBaseDbRepo[rooms.Room](repo.writer, repo.reader)
 	return nil
 }
 
@@ -79,4 +82,8 @@ func (repo *pgDBRepo) Close() (err error) {
 
 func (repo *pgDBRepo) Members() membersrepo.MembersRepo {
 	return repo.MembersRepo
+}
+
+func (repo *pgDBRepo) Rooms() roomsrepo.RoomsRepo {
+	return repo.RoomsRepo
 }

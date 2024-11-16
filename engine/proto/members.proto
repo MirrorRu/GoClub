@@ -46,10 +46,6 @@ service Members {
     }
     
    
-    message CRUDResult {
-        int64 rowsAffected = 1;
-    }
-    
     message MemberInfo {
         int64 id = 1;
         string fullName = 2 [(validate.rules).string.min_len = 2, (validate.rules).string.max_len = 100];
