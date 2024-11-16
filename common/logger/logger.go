@@ -4,9 +4,19 @@ import (
 	"context"
 	"log/slog"
 	"os"
+
+	"github.com/lmittmann/tint"
 )
 
-var log *slog.Logger = slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}))
+var log *slog.Logger = slog.New(tint.NewHandler(os.Stdout, &tint.Options{
+	Level: slog.LevelDebug,
+	//TimeFormat: time.StampMicro,
+	TimeFormat: "2006-01-02 15:04:05.000000000",
+}))
+
+// func Logger() *slog.Logger {
+// 	return log
+// }
 
 func Info(ctx context.Context, msg string, args ...any) {
 	richArgs := appendArgs(ctx, args...)
@@ -32,8 +42,4 @@ func Debug(ctx context.Context, msg string, args ...any) {
 func appendArgs(ctx context.Context, args ...any) []any {
 	//TODO extract values from context, and append to result
 	return args
-}
-
-func Logger() *slog.Logger {
-	return log
 }

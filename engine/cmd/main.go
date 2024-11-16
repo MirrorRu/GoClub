@@ -7,15 +7,16 @@ import (
 	"goclub/engine/internal/app"
 	"goclub/engine/internal/config"
 	"goclub/engine/internal/repository/db"
-	"goclub/model/common"
 	"goclub/model/members"
 	"os"
 	"time"
 )
 
-func main() {
-	bd := members.Birthday{Value: common.Date(time.Now().Truncate(time.Hour * 24)), Setted: true}
-	m := members.Member{ID: 1, Name: "Alice", Birthday: bd, Notes: "qwerty"}
+func main0() {
+	//bd := members.Birthday{Value: common.Date(time.Now().Truncate(time.Hour * 24)), Setted: true}
+	now := time.Now()
+	bd := now.Year()*10000 + int(now.Month())*100 + now.Day()
+	m := members.Member{ID: 1, FullName: "Alice", Birthday: members.Birthday(bd), Notes: "qwerty"}
 
 	/*
 		fmt.Println(reflect.TypeOf(m))
@@ -23,18 +24,17 @@ func main() {
 	*/
 	efs := db.ExtractStructInfo(&m)
 	fmt.Println(efs)
-	efs = db.ExtractStructInfo(m)
-	fmt.Println(efs)
-
-	db.DecodedTypes.Range(func(key, value any) bool {
-		fmt.Println(key, value)
-		return true
-	})
-
-	// foo(&m)
-	// fmt.Println(m)
+	var s string
+	s = db.QueryTextForRead(m)
+	fmt.Println(s)
+	s = db.QueryTextForRead(&m)
+	fmt.Println(s)
+	ptrs := db.QueryArgsForRead(&m)
+	fmt.Println(ptrs)
+	ptrs = db.QueryArgsForRead(m)
 }
-func main0() {
+
+func main() {
 	cfg := config.Cfg
 	ctx := context.Background()
 

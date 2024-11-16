@@ -2,25 +2,33 @@ package main
 
 import (
 	"fmt"
-	"goclub/engine/internal/repository/db"
-	"goclub/model/common"
-	"goclub/model/members"
 	"reflect"
 	"time"
 )
 
 func main() {
-	bd := members.Birthday{Value: common.Date(time.Now().Truncate(time.Hour * 24)), Setted: true}
-	m := members.Member{ID: 1, Name: "Alice", Birthday: bd, Notes: "qwerty"}
+	i := make([]int, 0)
+	fmt.Println(cap(i))
 
+	//bd := members.Birthday{Value: common.Date(time.Now().Truncate(time.Hour * 24)), Setted: true}
+	// m := members.Member{ID: 1, Name: "Alice", //Birthday: bd,
+	// 	Notes: "qwerty"}
+	type ssType struct {
+		Bomba string
+	}
+	ss := ssType{}
+
+	fmt.Println(reflect.TypeOf(ss.Bomba))
+	fmt.Println(reflect.TypeOf(ss.Bomba).Name())
+	t = time.Now()
 	/*
 		fmt.Println(reflect.TypeOf(m))
 		fmt.Println(reflect.TypeOf(&m))
 	*/
-	efs := db.ExtractFieldsSelect(&m)
-	fmt.Println(efs)
-	efs = db.ExtractFieldsSelect(m)
-	fmt.Println(efs)
+	// efs := db.ExtractFieldsSelect(&m)
+	// fmt.Println(efs)
+	// efs = db.ExtractFieldsSelect(m)
+	// fmt.Println(efs)
 
 	// foo(&m)
 	// fmt.Println(m)

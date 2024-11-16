@@ -33,14 +33,6 @@
             }
           }
         },
-        "parameters": [
-          {
-            "name": "filter.fullNamePart",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          }
-        ],
         "tags": [
           "Members"
         ]
@@ -76,7 +68,7 @@
         ]
       }
     },
-    "/api/v1/members/{memberId}": {
+    "/api/v1/members/{id}": {
       "get": {
         "operationId": "Members_MemberRead",
         "responses": {
@@ -95,7 +87,7 @@
         },
         "parameters": [
           {
-            "name": "memberId",
+            "name": "id",
             "in": "path",
             "required": true,
             "type": "string",
@@ -124,7 +116,7 @@
         },
         "parameters": [
           {
-            "name": "memberId",
+            "name": "id",
             "in": "path",
             "required": true,
             "type": "string",
@@ -136,7 +128,7 @@
         ]
       }
     },
-    "/api/v1/members/{object.memberId}": {
+    "/api/v1/members/{object.id}": {
       "put": {
         "operationId": "Members_MemberUpdate",
         "responses": {
@@ -155,7 +147,7 @@
         },
         "parameters": [
           {
-            "name": "object.memberId",
+            "name": "object.id",
             "in": "path",
             "required": true,
             "type": "string",
@@ -177,14 +169,6 @@
     }
   },
   "definitions": {
-    "MemberListingRequestListingFilter": {
-      "type": "object",
-      "properties": {
-        "fullNamePart": {
-          "type": "string"
-        }
-      }
-    },
     "MembersMemberUpdateBody": {
       "type": "object",
       "properties": {
@@ -195,12 +179,15 @@
               "type": "string"
             },
             "birthday": {
-              "type": "string",
-              "format": "date-time"
+              "$ref": "#/definitions/v1Date"
+            },
+            "notes": {
+              "type": "string"
             }
           }
         }
-      }
+      },
+      "title": "Updating"
     },
     "protobufAny": {
       "type": "object",
@@ -239,13 +226,23 @@
         }
       }
     },
+    "v1Date": {
+      "type": "object",
+      "properties": {
+        "yyyyMmDd": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
     "v1MemberCreateRequest": {
       "type": "object",
       "properties": {
         "object": {
           "$ref": "#/definitions/v1MemberInfo"
         }
-      }
+      },
+      "title": "Creating"
     },
     "v1MemberCreateResponse": {
       "type": "object",
@@ -253,9 +250,8 @@
         "crudResult": {
           "$ref": "#/definitions/v1CRUDResult"
         },
-        "memberId": {
-          "type": "string",
-          "format": "int64"
+        "object": {
+          "$ref": "#/definitions/v1MemberInfo"
         }
       }
     },
@@ -270,7 +266,7 @@
     "v1MemberInfo": {
       "type": "object",
       "properties": {
-        "memberId": {
+        "id": {
           "type": "string",
           "format": "int64"
         },
@@ -278,8 +274,10 @@
           "type": "string"
         },
         "birthday": {
-          "type": "string",
-          "format": "date-time"
+          "$ref": "#/definitions/v1Date"
+        },
+        "notes": {
+          "type": "string"
         }
       }
     },
@@ -314,6 +312,9 @@
       "properties": {
         "crudResult": {
           "$ref": "#/definitions/v1CRUDResult"
+        },
+        "object": {
+          "$ref": "#/definitions/v1MemberInfo"
         }
       }
     }

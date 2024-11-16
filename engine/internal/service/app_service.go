@@ -11,19 +11,15 @@ type ClubService interface {
 	Ping() string
 }
 
-type MembersService interface {
-	Do()
-}
-
 type AppService interface {
 	Club() ClubService
-	Members() MembersService
+	Members() memberservice.MembersService
 }
 
 type (
 	appService struct {
 		club    ClubService
-		members MembersService
+		members memberservice.MembersService
 	}
 )
 
@@ -38,6 +34,6 @@ func (svc *appService) Club() ClubService {
 	return svc.club
 }
 
-func (svc *appService) Members() MembersService {
+func (svc *appService) Members() memberservice.MembersService {
 	return svc.members
 }

@@ -3,6 +3,7 @@ package grpcserver
 import (
 	"context"
 	"fmt"
+	"goclub/engine/internal/grpc_server/middleware"
 	"net"
 
 	"google.golang.org/grpc"
@@ -29,7 +30,13 @@ type server struct {
 
 func NewGRPCServer(ctx context.Context, port string) *server {
 
-	srv := grpc.NewServer()
+	srv := grpc.NewServer(
+		grpc.ChainUnaryInterceptor(
+			middleware.Panic,
+			//middleware.Tracer,
+			middleware.Logger,
+		),
+	)
 
 	reflection.Register(srv)
 

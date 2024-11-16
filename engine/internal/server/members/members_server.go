@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"goclub/engine/internal/api"
 	"goclub/engine/internal/service"
+	"goclub/engine/repack"
+	"goclub/model/members"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 
@@ -38,8 +40,82 @@ func (srv *memberServer) RegisterHttpServer(ctx context.Context, mux *runtime.Se
 	return nil
 }
 
-func (srv *memberServer) MemberCreate(context.Context, *api.MemberCreateRequest) (*api.MemberCreateResponse, error) {
-	return nil, nil
+func (srv *memberServer) MemberCreate(ctx context.Context, req *api.MemberCreateRequest) (resp *api.MemberCreateResponse, err error) {
+	crudRes := srv.actor.Members().Create(ctx, repack.Member.FromInfo(req.GetObject()))
+	if crudRes.Error != nil {
+		return nil, crudRes.Error
+	}
+
+	resp = &api.MemberCreateResponse{
+		CrudResult: repack.CRUD.ToResp(crudRes.CRUDInfo),
+		Object:     repack.Member.ToInfo(crudRes.Data),
+	}
+	return resp, err
+}
+
+func (srv *memberServer) MemberUpdate(ctx context.Context, req *api.MemberUpdateRequest) (resp *api.MemberUpdateResponse, err error) {
+	crudRes := srv.actor.Members().Update(ctx, repack.Member.FromInfo(req.GetObject()))
+	if crudRes.Error != nil {
+		return nil, crudRes.Error
+	}
+
+	resp = &api.MemberUpdateResponse{
+		CrudResult: repack.CRUD.ToResp(crudRes.CRUDInfo),
+		Object:     repack.Member.ToInfo(crudRes.Data),
+	}
+	return resp, err
+}
+
+func (srv *memberServer) MemberDelete(ctx context.Context, req *api.MemberDeleteRequest) (resp *api.MemberDeleteResponse, err error) {
+	crudRes := srv.actor.Members().Delete(ctx, members.ID(req.GetId()))
+	if crudRes.Error != nil {
+		return nil, crudRes.Error
+	}
+
+	resp = &api.MemberDeleteResponse{
+		CrudResult: repack.CRUD.ToResp(crudRes.CRUDInfo),
+	}
+	return resp, err
+}
+
+func (srv *memberServer) MemberListing(ctx context.Context, req *api.MemberListingRequest) (resp *api.MemberListingResponse, err error) {
+	crudRes := srv.actor.Members().Listing(ctx, nil)
+	if crudRes.Error != nil {
+		return nil, crudRes.Error
+	}
+
+	resp = &api.MemberListingResponse{
+		CrudResult: repack.CRUD.ToResp(crudRes.CRUDInfo),
+		Objects:    repack.Member.ToInfos(crudRes.Data),
+	}
+	return resp, err
+}
+
+func (srv *memberServer) MemberRead(ctx context.Context, req *api.MemberReadRequest) (resp *api.MemberReadResponse, err error) {
+	crudRes := srv.actor.Members().Read(ctx, members.ID(req.GetId()))
+	if crudRes.Error != nil {
+		return nil, crudRes.Error
+	}
+
+	resp = &api.MemberReadResponse{
+		CrudResult: repack.CRUD.ToResp(crudRes.CRUDInfo),
+		Object:     repack.Member.ToInfo(crudRes.Data),
+	}
+	return resp, err
+}
+
+/*
+func (srv *memberServer) MemberCreate(ctx context.Context, res *api.MemberCreateRequest) (*api.MemberCreateResponse, error) {
+	obj := res.Object
+	member := &members.Member{
+		Name: members.Name(obj.GetFullName()),
+	}
+
+	createdMember, err := srv.actor.Members().Create(ctx, member)
+	resp := &api.MemberCreateResponse{
+		MemberId: int64(id),
+	}
+	return resp, err
 }
 
 func (srv *memberServer) MemberDelete(context.Context, *api.MemberDeleteRequest) (*api.MemberDeleteResponse, error) {
@@ -47,13 +123,29 @@ func (srv *memberServer) MemberDelete(context.Context, *api.MemberDeleteRequest)
 }
 
 func (srv *memberServer) MemberListing(context.Context, *api.MemberListingRequest) (*api.MemberListingResponse, error) {
+	//srv.actor.Members().
 	return nil, nil
 }
 
-func (srv *memberServer) MemberRead(context.Context, *api.MemberReadRequest) (*api.MemberReadResponse, error) {
-	return nil, nil
+func (srv *memberServer) MemberRead(ctx context.Context, req *api.MemberReadRequest) (*api.MemberReadResponse, error) {
+	member, err := srv.actor.Members().Read(ctx, members.ID(req.GetMemberId()))
+	if err != nil {
+		return nil, err
+	}
+
+	return &api.MemberReadResponse{
+		Object: &api.MemberInfo{MemberId: int64(member.ID), FullName: string(member.Name)},
+	}, nil
 }
 
 func (srv *memberServer) MemberUpdate(context.Context, *api.MemberUpdateRequest) (*api.MemberUpdateResponse, error) {
-	return nil, nil
+	member, err := srv.actor.Members().Update(ctx, members.ID(req.GetMemberId()))
+	if err != nil {
+		return nil, err
+	}
+
+	return &api.MemberReadResponse{
+		Object: &api.MemberInfo{MemberId: int64(member.ID), FullName: string(member.Name)},
+	}, nil
 }
+*/

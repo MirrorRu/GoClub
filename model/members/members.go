@@ -6,14 +6,14 @@ import (
 
 type (
 	ID       common.ID
-	Name     common.Name
+	FullName common.Name
 	Notes    common.Notes
-	Birthday common.Option[common.Date]
+	Birthday common.Date //common.Option[common.Date]
 
 	Member struct {
-		ID       ID       `json:"id" db:"groups=key,base"`
-		Name     Name     `json:"name" db:"groups=base"`
-		Birthday Birthday `json:"birthday" db:"groups=base"`
-		Notes    Notes    `json:"notes" db:"groups=aux"`
+		ID       ID       `json:"id" db:"groups=key;auto;base|title=Код"`
+		FullName FullName `json:"name" db:"groups=base|title=Имя|name=name"`
+		Birthday Birthday `json:"birthday" db:"groups=base|title=День рождения"`
+		Notes    Notes    `json:"notes" db:"groups=aux|title=Примечание"`
 	}
 )

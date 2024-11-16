@@ -6,7 +6,8 @@ import "google/protobuf/empty.proto";
 import "google/api/annotations.proto";
 import "protoc-gen-openapiv2/options/annotations.proto";
 import "validate/validate.proto";
-import "google/protobuf/timestamp.proto";
+//import "google/protobuf/timestamp.proto";
+import "common.proto";
 
 option go_package = "goclub/engine/v1;api";
 
@@ -21,20 +22,20 @@ service Members {
     
         rpc MemberUpdate(MemberUpdateRequest) returns (MemberUpdateResponse) {
             option (google.api.http) = {
-                put: "/api/v1/members/{object.member_id}"
+                put: "/api/v1/members/{object.id}"
                 body: "*"
             };
         }
     
         rpc MemberDelete(MemberDeleteRequest) returns (MemberDeleteResponse)  {
             option (google.api.http) = {
-                delete: "/api/v1/members/{member_id}"
+                delete: "/api/v1/members/{id}"
             };
         }
     
         rpc MemberRead(MemberReadRequest) returns (MemberReadResponse)  {
             option (google.api.http) = {
-                get: "/api/v1/members/{member_id}"
+                get: "/api/v1/members/{id}"
             };
         }
         rpc   MemberListing(  MemberListingRequest) returns (  MemberListingResponse)  {
@@ -50,57 +51,55 @@ service Members {
     }
     
     message MemberInfo {
-        int64 member_id = 1;
+        int64 id = 1;
         string fullName = 2 [(validate.rules).string.min_len = 2, (validate.rules).string.max_len = 100];
-        google.protobuf.Timestamp birthday = 3 [(validate.rules).timestamp = {
-            lt_now: true,
-            within: {seconds: 3153600000} // 60*60*24*365*100 - 100 years
-          }];
+        Date birthday = 3; 
+        string notes = 4 [(validate.rules).string.max_len = 10000];
     }
     
+    // Creating
     message MemberCreateRequest {
         MemberInfo object = 1;
     }
     
     message MemberCreateResponse {
-        CRUDResult crudResult = 1;
-        int64 member_id = 2;
+        CRUDResult crud_result = 1;
+        MemberInfo object = 2;
     }
     
+    // Updating
     message MemberUpdateRequest {
         MemberInfo object = 1;
     }
     
     message MemberUpdateResponse   {
-        CRUDResult crudResult = 1;
+        CRUDResult crud_result = 1;
+        MemberInfo object = 2;
     }
     
+    // Deleting
     message MemberDeleteRequest {
-        int64 member_id = 1;
+        int64 id = 1;
     }
     
     message MemberDeleteResponse {
-        CRUDResult crudResult = 1;
+        CRUDResult crud_result = 1;
     }
     
     message MemberReadRequest {
-        int64 member_id = 1;
+        int64 id = 1;
     }
     
     message MemberReadResponse {
-        CRUDResult crudResult = 1;
+        CRUDResult crud_result = 1;
         MemberInfo object = 2;
     }
     
     message  MemberListingRequest {
-        message ListingFilter {
-            string fullNamePart = 1;
-        }
-        ListingFilter filter = 1;
     }
     
     message  MemberListingResponse  {
-        CRUDResult crudResult = 1;
+        CRUDResult crud_result = 1;
         repeated MemberInfo objects = 2;
     }
     

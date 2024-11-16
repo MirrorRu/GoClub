@@ -1,13 +1,11 @@
 package common
 
-import "time"
-
 type (
 	ID int64
 
 	Name  string
 	Notes string
-	Date  time.Time
+	Date  int64
 
 	Option[T any] struct {
 		Setted bool // Is value setted and valid

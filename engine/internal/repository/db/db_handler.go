@@ -10,7 +10,10 @@ import (
 const pkgName = "db."
 
 type DbHandler interface {
+	Connection() *sql.DB
 	Exec(ctx context.Context, query string, args ...any) (result sql.Result, err error)
+	QueryRow(ctx context.Context, query string, args ...any) (result *sql.Row, err error)
+	Query(ctx context.Context, query string, args ...any) (result *sql.Rows, err error)
 	Close() (err error)
 }
 
@@ -20,11 +23,15 @@ type dbHandler struct {
 	stmtMap  sync.Map
 }
 
-func NewDbHandler(connPool *sql.DB) *dbHandler {
+func NewDbHandler(connPool *sql.DB) DbHandler {
 	return &dbHandler{
 		connPool: connPool,
 		stmtMap:  sync.Map{},
 	}
+}
+
+func (dbh *dbHandler) Connection() *sql.DB {
+	return dbh.connPool
 }
 
 func (dbh *dbHandler) shtm(ctx context.Context, query string) (result *sql.Stmt, err error) {
@@ -48,6 +55,27 @@ func (dbh *dbHandler) Exec(ctx context.Context, query string, args ...any) (resu
 		result, err = stmt.ExecContext(ctx, args...)
 	}
 	return result, errapp.Wrap(pkgName+fnName, err)
+}
+
+func (dbh *dbHandler) QueryRow(ctx context.Context, query string, args ...any) (result *sql.Row, err error) {
+	const fnName = "QueryRow"
+	stmt, err := dbh.shtm(ctx, query)
+	if err == nil {
+		result = stmt.QueryRowContext(ctx, args...)
+		err = result.Err()
+	}
+	return result, errapp.Wrap(pkgName+fnName, err)
+
+}
+
+func (dbh *dbHandler) Query(ctx context.Context, query string, args ...any) (result *sql.Rows, err error) {
+	const fnName = "Query"
+	stmt, err := dbh.shtm(ctx, query)
+	if err != nil {
+		return nil, errapp.Wrap(pkgName+fnName, err)
+	}
+	result, err = stmt.QueryContext(ctx, args...)
+	return result, err
 }
 
 func (dbh *dbHandler) Close() (err error) {

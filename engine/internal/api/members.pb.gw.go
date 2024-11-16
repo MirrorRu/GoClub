@@ -72,14 +72,14 @@ func request_Members_MemberUpdate_0(ctx context.Context, marshaler runtime.Marsh
 		_   = err
 	)
 
-	val, ok = pathParams["object.member_id"]
+	val, ok = pathParams["object.id"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "object.member_id")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "object.id")
 	}
 
-	err = runtime.PopulateFieldFromPath(&protoReq, "object.member_id", val)
+	err = runtime.PopulateFieldFromPath(&protoReq, "object.id", val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "object.member_id", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "object.id", err)
 	}
 
 	msg, err := client.MemberUpdate(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -102,14 +102,14 @@ func local_request_Members_MemberUpdate_0(ctx context.Context, marshaler runtime
 		_   = err
 	)
 
-	val, ok = pathParams["object.member_id"]
+	val, ok = pathParams["object.id"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "object.member_id")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "object.id")
 	}
 
-	err = runtime.PopulateFieldFromPath(&protoReq, "object.member_id", val)
+	err = runtime.PopulateFieldFromPath(&protoReq, "object.id", val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "object.member_id", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "object.id", err)
 	}
 
 	msg, err := server.MemberUpdate(ctx, &protoReq)
@@ -128,14 +128,14 @@ func request_Members_MemberDelete_0(ctx context.Context, marshaler runtime.Marsh
 		_   = err
 	)
 
-	val, ok = pathParams["member_id"]
+	val, ok = pathParams["id"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "member_id")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "id")
 	}
 
-	protoReq.MemberId, err = runtime.Int64(val)
+	protoReq.Id, err = runtime.Int64(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "member_id", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "id", err)
 	}
 
 	msg, err := client.MemberDelete(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -154,14 +154,14 @@ func local_request_Members_MemberDelete_0(ctx context.Context, marshaler runtime
 		_   = err
 	)
 
-	val, ok = pathParams["member_id"]
+	val, ok = pathParams["id"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "member_id")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "id")
 	}
 
-	protoReq.MemberId, err = runtime.Int64(val)
+	protoReq.Id, err = runtime.Int64(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "member_id", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "id", err)
 	}
 
 	msg, err := server.MemberDelete(ctx, &protoReq)
@@ -180,14 +180,14 @@ func request_Members_MemberRead_0(ctx context.Context, marshaler runtime.Marshal
 		_   = err
 	)
 
-	val, ok = pathParams["member_id"]
+	val, ok = pathParams["id"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "member_id")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "id")
 	}
 
-	protoReq.MemberId, err = runtime.Int64(val)
+	protoReq.Id, err = runtime.Int64(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "member_id", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "id", err)
 	}
 
 	msg, err := client.MemberRead(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -206,14 +206,14 @@ func local_request_Members_MemberRead_0(ctx context.Context, marshaler runtime.M
 		_   = err
 	)
 
-	val, ok = pathParams["member_id"]
+	val, ok = pathParams["id"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "member_id")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "id")
 	}
 
-	protoReq.MemberId, err = runtime.Int64(val)
+	protoReq.Id, err = runtime.Int64(val)
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "member_id", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "id", err)
 	}
 
 	msg, err := server.MemberRead(ctx, &protoReq)
@@ -221,20 +221,9 @@ func local_request_Members_MemberRead_0(ctx context.Context, marshaler runtime.M
 
 }
 
-var (
-	filter_Members_MemberListing_0 = &utilities.DoubleArray{Encoding: map[string]int{}, Base: []int(nil), Check: []int(nil)}
-)
-
 func request_Members_MemberListing_0(ctx context.Context, marshaler runtime.Marshaler, client MembersClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq MemberListingRequest
 	var metadata runtime.ServerMetadata
-
-	if err := req.ParseForm(); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_Members_MemberListing_0); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
 
 	msg, err := client.MemberListing(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
@@ -244,13 +233,6 @@ func request_Members_MemberListing_0(ctx context.Context, marshaler runtime.Mars
 func local_request_Members_MemberListing_0(ctx context.Context, marshaler runtime.Marshaler, server MembersServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq MemberListingRequest
 	var metadata runtime.ServerMetadata
-
-	if err := req.ParseForm(); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_Members_MemberListing_0); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
 
 	msg, err := server.MemberListing(ctx, &protoReq)
 	return msg, metadata, err
@@ -296,7 +278,7 @@ func RegisterMembersHandlerServer(ctx context.Context, mux *runtime.ServeMux, se
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/goclub.engine.v1.Members/MemberUpdate", runtime.WithHTTPPathPattern("/api/v1/members/{object.member_id}"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/goclub.engine.v1.Members/MemberUpdate", runtime.WithHTTPPathPattern("/api/v1/members/{object.id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -321,7 +303,7 @@ func RegisterMembersHandlerServer(ctx context.Context, mux *runtime.ServeMux, se
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/goclub.engine.v1.Members/MemberDelete", runtime.WithHTTPPathPattern("/api/v1/members/{member_id}"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/goclub.engine.v1.Members/MemberDelete", runtime.WithHTTPPathPattern("/api/v1/members/{id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -346,7 +328,7 @@ func RegisterMembersHandlerServer(ctx context.Context, mux *runtime.ServeMux, se
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/goclub.engine.v1.Members/MemberRead", runtime.WithHTTPPathPattern("/api/v1/members/{member_id}"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/goclub.engine.v1.Members/MemberRead", runtime.WithHTTPPathPattern("/api/v1/members/{id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -457,7 +439,7 @@ func RegisterMembersHandlerClient(ctx context.Context, mux *runtime.ServeMux, cl
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/goclub.engine.v1.Members/MemberUpdate", runtime.WithHTTPPathPattern("/api/v1/members/{object.member_id}"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/goclub.engine.v1.Members/MemberUpdate", runtime.WithHTTPPathPattern("/api/v1/members/{object.id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -479,7 +461,7 @@ func RegisterMembersHandlerClient(ctx context.Context, mux *runtime.ServeMux, cl
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/goclub.engine.v1.Members/MemberDelete", runtime.WithHTTPPathPattern("/api/v1/members/{member_id}"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/goclub.engine.v1.Members/MemberDelete", runtime.WithHTTPPathPattern("/api/v1/members/{id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -501,7 +483,7 @@ func RegisterMembersHandlerClient(ctx context.Context, mux *runtime.ServeMux, cl
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/goclub.engine.v1.Members/MemberRead", runtime.WithHTTPPathPattern("/api/v1/members/{member_id}"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/goclub.engine.v1.Members/MemberRead", runtime.WithHTTPPathPattern("/api/v1/members/{id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -545,11 +527,11 @@ func RegisterMembersHandlerClient(ctx context.Context, mux *runtime.ServeMux, cl
 var (
 	pattern_Members_MemberCreate_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "v1", "members"}, ""))
 
-	pattern_Members_MemberUpdate_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"api", "v1", "members", "object.member_id"}, ""))
+	pattern_Members_MemberUpdate_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"api", "v1", "members", "object.id"}, ""))
 
-	pattern_Members_MemberDelete_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"api", "v1", "members", "member_id"}, ""))
+	pattern_Members_MemberDelete_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"api", "v1", "members", "id"}, ""))
 
-	pattern_Members_MemberRead_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"api", "v1", "members", "member_id"}, ""))
+	pattern_Members_MemberRead_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"api", "v1", "members", "id"}, ""))
 
 	pattern_Members_MemberListing_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "v1", "members"}, ""))
 )
