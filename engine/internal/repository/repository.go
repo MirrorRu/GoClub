@@ -1,8 +1,8 @@
 package repository
 
 import (
-	membersrepo "goclub/engine/internal/repository/members_repo"
-	roomsrepo "goclub/engine/internal/repository/rooms_repo"
+	membersrepo "goclub/engine/internal/repository/memberrepo"
+	roomsrepo "goclub/engine/internal/repository/roomrepo"
 )
 
 const (

@@ -3,9 +3,9 @@ package server
 import (
 	grpcserver "goclub/engine/internal/grpc_server"
 	httpserver "goclub/engine/internal/http_server"
-	clubserver "goclub/engine/internal/server/club"
-	memberserver "goclub/engine/internal/server/members"
-	roomsserver "goclub/engine/internal/server/rooms"
+	clubsrv "goclub/engine/internal/server/club_srv"
+	membersrv "goclub/engine/internal/server/member_srv"
+	roomsrv "goclub/engine/internal/server/room_srv"
 	"goclub/engine/internal/service"
 )
 
@@ -29,9 +29,9 @@ type appServer struct {
 
 func NewAppServer(controller service.AppService) *appServer {
 	return &appServer{
-		clubServer:   clubserver.NewClubServer(controller),
-		memberServer: memberserver.NewMemberServer(controller),
-		roomServer:   roomsserver.NewRoomServer(controller),
+		clubServer:   clubsrv.NewClubServer(controller),
+		memberServer: membersrv.NewMemberServer(controller),
+		roomServer:   roomsrv.NewRoomServer(controller),
 	}
 }
 

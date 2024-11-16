@@ -1,4 +1,4 @@
-package clubserver
+package clubsrv
 
 import (
 	"context"

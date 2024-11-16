@@ -1,4 +1,4 @@
-package membersrepo
+package roomrepo
 
 import (
 	"goclub/model/common"

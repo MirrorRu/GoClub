@@ -1,4 +1,4 @@
-package membersrepo
+package memberrepo
 
 // import (
 // 	"context"

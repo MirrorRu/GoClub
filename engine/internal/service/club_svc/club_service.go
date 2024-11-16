@@ -1,4 +1,4 @@
-package clubservice
+package clubsvc
 
 import "goclub/engine/internal/repository"
 

@@ -1,4 +1,4 @@
-package memberservice
+package membersvc
 
 import (
 	"goclub/model/common"

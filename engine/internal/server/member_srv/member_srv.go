@@ -1,10 +1,11 @@
-package memberserver
+package membersrv
 
 import (
 	"context"
 	"fmt"
 	"goclub/engine/internal/api"
 	"goclub/engine/internal/service"
+	membersvc "goclub/engine/internal/service/member_svc"
 	"goclub/engine/repack"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
@@ -16,14 +17,14 @@ const pkgName = "MemberServer"
 
 type memberServer struct {
 	api.UnimplementedMembersServer
-	actor service.AppService
+	actor membersvc.MembersService
 }
 
 func NewMemberServer(
 	controller service.AppService,
 ) *memberServer {
 	return &memberServer{
-		actor: controller,
+		actor: controller.Members(),
 	}
 }
 
@@ -40,7 +41,7 @@ func (srv *memberServer) RegisterHttpServer(ctx context.Context, mux *runtime.Se
 }
 
 func (srv *memberServer) MemberCreate(ctx context.Context, req *api.MemberCreateRequest) (resp *api.MemberCreateResponse, err error) {
-	crudRes := srv.actor.Members().Create(ctx, repack.Member.FromInfo(req.GetObject()))
+	crudRes := srv.actor.Create(ctx, repack.Member.FromInfo(req.GetObject()))
 	if crudRes.Error != nil {
 		return nil, crudRes.Error
 	}
@@ -53,7 +54,7 @@ func (srv *memberServer) MemberCreate(ctx context.Context, req *api.MemberCreate
 }
 
 func (srv *memberServer) MemberUpdate(ctx context.Context, req *api.MemberUpdateRequest) (resp *api.MemberUpdateResponse, err error) {
-	crudRes := srv.actor.Members().Update(ctx, repack.Member.FromInfo(req.GetObject()))
+	crudRes := srv.actor.Update(ctx, repack.Member.FromInfo(req.GetObject()))
 	if crudRes.Error != nil {
 		return nil, crudRes.Error
 	}
@@ -66,7 +67,7 @@ func (srv *memberServer) MemberUpdate(ctx context.Context, req *api.MemberUpdate
 }
 
 func (srv *memberServer) MemberDelete(ctx context.Context, req *api.MemberDeleteRequest) (resp *api.MemberDeleteResponse, err error) {
-	crudRes := srv.actor.Members().Delete(ctx, req.GetId())
+	crudRes := srv.actor.Delete(ctx, req.GetId())
 	if crudRes.Error != nil {
 		return nil, crudRes.Error
 	}
@@ -78,7 +79,7 @@ func (srv *memberServer) MemberDelete(ctx context.Context, req *api.MemberDelete
 }
 
 func (srv *memberServer) MemberListing(ctx context.Context, req *api.MemberListingRequest) (resp *api.MemberListingResponse, err error) {
-	crudRes := srv.actor.Members().Listing(ctx, nil)
+	crudRes := srv.actor.Listing(ctx, nil)
 	if crudRes.Error != nil {
 		return nil, crudRes.Error
 	}
@@ -91,7 +92,7 @@ func (srv *memberServer) MemberListing(ctx context.Context, req *api.MemberListi
 }
 
 func (srv *memberServer) MemberRead(ctx context.Context, req *api.MemberReadRequest) (resp *api.MemberReadResponse, err error) {
-	crudRes := srv.actor.Members().Read(ctx, req.GetId())
+	crudRes := srv.actor.Read(ctx, req.GetId())
 	if crudRes.Error != nil {
 		return nil, crudRes.Error
 	}
@@ -110,7 +111,7 @@ func (srv *memberServer) MemberCreate(ctx context.Context, res *api.MemberCreate
 		Name: members.Name(obj.GetFullName()),
 	}
 
-	createdMember, err := srv.actor.Members().Create(ctx, member)
+	createdMember, err := srv.actor.Create(ctx, member)
 	resp := &api.MemberCreateResponse{
 		MemberId: int64(id),
 	}
@@ -122,12 +123,12 @@ func (srv *memberServer) MemberDelete(context.Context, *api.MemberDeleteRequest)
 }
 
 func (srv *memberServer) MemberListing(context.Context, *api.MemberListingRequest) (*api.MemberListingResponse, error) {
-	//srv.actor.Members().
+	//srv.actor.
 	return nil, nil
 }
 
 func (srv *memberServer) MemberRead(ctx context.Context, req *api.MemberReadRequest) (*api.MemberReadResponse, error) {
-	member, err := srv.actor.Members().Read(ctx, members.ID(req.GetMemberId()))
+	member, err := srv.actor.Read(ctx, members.ID(req.GetMemberId()))
 	if err != nil {
 		return nil, err
 	}
@@ -138,7 +139,7 @@ func (srv *memberServer) MemberRead(ctx context.Context, req *api.MemberReadRequ
 }
 
 func (srv *memberServer) MemberUpdate(context.Context, *api.MemberUpdateRequest) (*api.MemberUpdateResponse, error) {
-	member, err := srv.actor.Members().Update(ctx, members.ID(req.GetMemberId()))
+	member, err := srv.actor.Update(ctx, members.ID(req.GetMemberId()))
 	if err != nil {
 		return nil, err
 	}

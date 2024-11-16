@@ -1,4 +1,4 @@
-package roomservice
+package roomsvc
 
 import (
 	"goclub/model/common"

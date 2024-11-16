@@ -1,4 +1,4 @@
-package roomsserver
+package roomsrv
 
 import (
 	"context"

@@ -2,9 +2,9 @@ package service
 
 import (
 	"goclub/engine/internal/repository"
-	clubservice "goclub/engine/internal/service/club"
-	memberservice "goclub/engine/internal/service/member"
-	roomservice "goclub/engine/internal/service/room"
+	clubsvc "goclub/engine/internal/service/club_svc"
+	membersvc "goclub/engine/internal/service/member_svc"
+	roomsvc "goclub/engine/internal/service/room_svc"
 	"goclub/model/members"
 	"goclub/model/rooms"
 )
@@ -16,21 +16,21 @@ type ClubService interface {
 
 type AppService interface {
 	Club() ClubService
-	Members() memberservice.MembersService
-	Rooms() roomservice.RoomsService
+	Members() membersvc.MembersService
+	Rooms() roomsvc.RoomsService
 }
 
 type (
 	appService struct {
 		club    ClubService
-		members memberservice.MembersService
-		rooms   roomservice.RoomsService
+		members membersvc.MembersService
+		rooms   roomsvc.RoomsService
 	}
 )
 
 func NewAppService(repo repository.Repository) (appSvc *appService) {
 	appSvc = &appService{
-		club:    clubservice.NewClubService(repo),
+		club:    clubsvc.NewClubService(repo),
 		members: NewDictBaseService[members.Member](repo.Members()),
 		rooms:   NewDictBaseService[rooms.Room](repo.Rooms()),
 	}
@@ -41,10 +41,10 @@ func (svc *appService) Club() ClubService {
 	return svc.club
 }
 
-func (svc *appService) Members() memberservice.MembersService {
+func (svc *appService) Members() membersvc.MembersService {
 	return svc.members
 }
 
-func (svc *appService) Rooms() roomservice.RoomsService {
+func (svc *appService) Rooms() roomsvc.RoomsService {
 	return svc.rooms
 }
