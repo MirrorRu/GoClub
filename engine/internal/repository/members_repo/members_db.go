@@ -11,17 +11,15 @@ import (
 
 type (
 	membersDbRepo struct {
-		writeHandle db.DbHandler
-		writeStmt   map[string]sql.Stmt
-		readHandle  db.DbHandler
-		readStmt    map[string]sql.Stmt
+		writeHandleLoc db.DbHandler
+		readHandleLoc  db.DbHandler
 	}
 )
 
 func NewMembersDbRepo(writeHandle db.DbHandler, readHandle db.DbHandler) *membersDbRepo {
 	return &membersDbRepo{
-		writeHandle: writeHandle,
-		readHandle:  readHandle,
+		writeHandleLoc: writeHandle,
+		readHandleLoc:  readHandle,
 	}
 }
 
@@ -34,7 +32,7 @@ func (repo *membersDbRepo) MemberCreate(ctx context.Context, member *members.Mem
 	logger.Debug(ctx, fnName, "queryArgs", queryArgs)
 
 	var rows *sql.Rows
-	rows, result.Error = repo.writeHandle.Query(ctx, query, queryArgs...)
+	rows, result.Error = repo.writeHandleLoc.Query(ctx, query, queryArgs...)
 	if result.Error != nil {
 		return result
 	}
@@ -66,7 +64,7 @@ func (repo *membersDbRepo) MemberUpdate(ctx context.Context, member *members.Mem
 	logger.Debug(ctx, fnName, "queryArgs", queryArgs)
 
 	var rows *sql.Rows
-	rows, result.Error = repo.writeHandle.Query(ctx, query, queryArgs...)
+	rows, result.Error = repo.writeHandleLoc.Query(ctx, query, queryArgs...)
 	if result.Error != nil {
 		return result
 	}
@@ -101,7 +99,7 @@ func (repo *membersDbRepo) MemberRead(ctx context.Context, id members.ID) (resul
 	logger.Debug(ctx, fnName, "queryArgs", queryArgs)
 
 	var rows *sql.Rows
-	rows, result.Error = repo.readHandle.Query(ctx, query, queryArgs...)
+	rows, result.Error = repo.readHandleLoc.Query(ctx, query, queryArgs...)
 	if result.Error != nil {
 		return result
 	}
@@ -134,7 +132,7 @@ func (repo *membersDbRepo) MemberList(ctx context.Context, filter any) (result c
 	logger.Debug(ctx, fnName, "queryArgs", queryArgs)
 
 	var rows *sql.Rows
-	rows, result.Error = repo.readHandle.Query(ctx, query, queryArgs...)
+	rows, result.Error = repo.readHandleLoc.Query(ctx, query, queryArgs...)
 	if result.Error != nil {
 		return result
 	}
@@ -169,7 +167,7 @@ func (repo *membersDbRepo) MemberDelete(ctx context.Context, id members.ID) (res
 	logger.Debug(ctx, fnName, "queryArgs", queryArgs)
 
 	var execRes sql.Result
-	execRes, result.Error = repo.writeHandle.Exec(ctx, query, queryArgs...)
+	execRes, result.Error = repo.writeHandleLoc.Exec(ctx, query, queryArgs...)
 	if result.Error != nil {
 		return result
 	}
@@ -177,38 +175,3 @@ func (repo *membersDbRepo) MemberDelete(ctx context.Context, id members.ID) (res
 
 	return result
 }
-
-/*
-
-func (repo *membersDbRepo) MemberDelete(ctx context.Context, id members.ID) (result *DeleteResp, err error) {
-	return &DeleteResp{}, nil
-}
-
-func (repo *membersDbRepo) MemberRead(ctx context.Context, id members.ID) (result *members.Member, err error) {
-	result = &members.Member{
-		ID: id,
-	}
-	query := db.QueryTextForRead(result)
-	logger.Debug(ctx, "MemberRead", "query", query)
-
-	queryArgs := db.QueryArgsForRead(result)
-	logger.Debug(ctx, "MemberRead", "queryArgs", queryArgs)
-
-	scanArgs := db.ScanArgsForRead(result)
-	logger.Debug(ctx, "MemberRead", "scanArgs", scanArgs)
-
-	row, err := repo.readHandle.QueryRow(ctx, query, queryArgs...)
-	if err != nil {
-		return result, err
-	}
-	logger.Debug(ctx, "MemberRead", "row", row)
-
-	row.Scan(scanArgs...)
-	logger.Debug(ctx, "MemberRead", "result", result)
-	return result, nil
-}
-
-func (repo *membersDbRepo) MemberList(ctx context.Context, req *ListReq) (result *ListResp, err error) {
-	return &ListResp{}, nil
-}
-*/

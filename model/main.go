@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"reflect"
-	"time"
 )
 
 func main() {
@@ -20,7 +19,7 @@ func main() {
 
 	fmt.Println(reflect.TypeOf(ss.Bomba))
 	fmt.Println(reflect.TypeOf(ss.Bomba).Name())
-	t = time.Now()
+	//t = time.Now()
 	/*
 		fmt.Println(reflect.TypeOf(m))
 		fmt.Println(reflect.TypeOf(&m))
