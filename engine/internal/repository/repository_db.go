@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"goclub/engine/internal/config"
 	"goclub/engine/internal/repository/db"
-	membersrepo "goclub/engine/internal/repository/memberrepo"
-	roomsrepo "goclub/engine/internal/repository/roomrepo"
+	membersrepo "goclub/engine/internal/repository/member_repo"
+	roomsrepo "goclub/engine/internal/repository/room_repo"
 	"goclub/model/members"
 	"goclub/model/rooms"
 
