@@ -13,7 +13,7 @@ func (member) FromInfo(info *api.MemberInfo) *members.Member {
 	return &members.Member{
 		ID:       members.ID(info.GetId()),
 		FullName: members.FullName(info.GetFullName()),
-		Birthday: members.Birthday(info.Birthday.GetYyyyMmDd()),
+		Birthday: members.Birthday(info.GetBirthday().GetYyyyMmDd()),
 		Notes:    members.Notes(info.GetNotes()),
 	}
 }

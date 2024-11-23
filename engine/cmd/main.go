@@ -6,7 +6,7 @@ import (
 	"goclub/common/logger"
 	"goclub/engine/internal/app"
 	"goclub/engine/internal/config"
-	"goclub/engine/internal/repository/db"
+	"goclub/engine/internal/repository/tarif_repo"
 	"os"
 )
 
@@ -37,49 +37,16 @@ type TopType struct {
 	E *PtrType
 }
 
-func main() {
-
-	top := TopType{
-		D: &PtrType{},
-	}
-	// x := db.DoExtractStructFields(reflect.TypeOf(top))
-	// for k, v := range x {
-	// 	fmt.Printf("%d: %+v\n", k, v)
-	// }
-
-	//ti :=	db.ExtractStructInfo(top)
-	//fmt.Printf("%+v\n", ti)
-	var q string
-	var p1, p0 []any
-	q = db.QueryTextForInsert(top)
-	fmt.Println(q)
-	p0 = []any{&top.A, &top.B, &top.C.E1, &top.C.E2, &top.C.E3.F1}
-	if top.D != nil {
-		p0 = append(p0, &top.D.P1, &top.D.P2)
-	}
-	p1 = db.QueryArgsForInsert(&top)
-	fmt.Println(p0)
-	fmt.Println(p1)
-	// q = db.QueryTextForUpdate(top)
-	// fmt.Println(q)
-	// q = db.QueryTextForDelete(top)
-	// fmt.Println(q)
-	// q = db.QueryTextForRead(top)
-	// fmt.Println(q)
-	// q = db.QueryTextForList(top, nil)
-	// fmt.Println(q)
-	/*
-		db.ExtractStructInfo(&top)
-		db.DecodedTypes.Range(func(key, value any) bool {
-			fmt.Println("Key:", key)
-			fmt.Println("Val:", value)
-			return true
-		})
-	*/
-
+func main0() {
+	tr := tarifrepo.NewTarifsRepo(nil, nil)
+	fmt.Println(tr.QueryTextForInsert())
+	fmt.Println(tr.QueryTextForUpdate())
+	fmt.Println(tr.QueryTextForDelete())
+	fmt.Println(tr.QueryTextForRead())
+	fmt.Println(tr.QueryTextForList(nil))
 }
 
-func main1() {
+func main() {
 	cfg := config.Cfg
 	ctx := context.Background()
 

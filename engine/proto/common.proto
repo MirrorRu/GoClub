@@ -9,5 +9,5 @@ message Date {
 }
 
 message CRUDResult {
-    int64 rowsAffected = 1;
+    int64 rows_affected = 1;
 }

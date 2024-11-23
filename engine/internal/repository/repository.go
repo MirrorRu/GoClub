@@ -1,8 +1,9 @@
 package repository
 
 import (
-	membersrepo "goclub/engine/internal/repository/member_repo"
-	roomsrepo "goclub/engine/internal/repository/room_repo"
+	"goclub/engine/internal/repository/member_repo"
+	"goclub/engine/internal/repository/room_repo"
+	"goclub/engine/internal/repository/tarif_repo"
 )
 
 const (
@@ -16,6 +17,7 @@ type RepoOpenCloser interface {
 
 type Repository interface {
 	RepoOpenCloser
-	Members() membersrepo.MembersRepo
-	Rooms() roomsrepo.RoomsRepo
+	Members() memberrepo.MembersRepo
+	Rooms() roomrepo.RoomsRepo
+	Tarifs() tarifrepo.TarifsRepo
 }

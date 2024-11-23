@@ -12,90 +12,92 @@ import "common.proto";
 option go_package = "goclub/engine/v1;api";
 
 
-service Rooms {
-        rpc RoomCreate(RoomCreateRequest) returns (RoomCreateResponse)  {
+service Tarifs {
+        rpc TarifCreate(TarifCreateRequest) returns (TarifCreateResponse)  {
             option (google.api.http) = {
-                post: "/api/v1/rooms"
+                post: "/api/v1/tarifs"
                 body: "*"
             };
         }
     
-        rpc RoomUpdate(RoomUpdateRequest) returns (RoomUpdateResponse) {
+        rpc TarifUpdate(TarifUpdateRequest) returns (TarifUpdateResponse) {
             option (google.api.http) = {
-                put: "/api/v1/rooms/{object.id}"
+                put: "/api/v1/tarifs/{object.id}"
                 body: "*"
             };
         }
     
-        rpc RoomDelete(RoomDeleteRequest) returns (RoomDeleteResponse)  {
+        rpc TarifDelete(TarifDeleteRequest) returns (TarifDeleteResponse)  {
             option (google.api.http) = {
-                delete: "/api/v1/rooms/{id}"
+                delete: "/api/v1/tarifs/{id}"
             };
         }
     
-        rpc RoomRead(RoomReadRequest) returns (RoomReadResponse)  {
+        rpc TarifRead(TarifReadRequest) returns (TarifReadResponse)  {
             option (google.api.http) = {
-                get: "/api/v1/rooms/{id}"
+                get: "/api/v1/tarifs/{id}"
             };
         }
-        rpc   RoomListing(  RoomListingRequest) returns (  RoomListingResponse)  {
+        rpc   TarifListing(  TarifListingRequest) returns (  TarifListingResponse)  {
             option (google.api.http) = {
-                get: "/api/v1/rooms"
+                get: "/api/v1/tarifs"
             };
         }
     }
     
    
 
-    message RoomInfo {
+    message TarifInfo {
         int64 id = 1;
         string name = 2 [(validate.rules).string.min_len = 2, (validate.rules).string.max_len = 100];
+        Date start_date = 3;
+        Date end_date = 4;
     }
     
     // Creating
-    message RoomCreateRequest {
-        RoomInfo object = 1;
+    message TarifCreateRequest {
+        TarifInfo object = 1;
     }
     
-    message RoomCreateResponse {
+    message TarifCreateResponse {
         CRUDResult crud_result = 1;
-        RoomInfo object = 2;
+        TarifInfo object = 2;
     }
     
     // Updating
-    message RoomUpdateRequest {
-        RoomInfo object = 1;
+    message TarifUpdateRequest {
+        TarifInfo object = 1;
     }
     
-    message RoomUpdateResponse   {
+    message TarifUpdateResponse   {
         CRUDResult crud_result = 1;
-        RoomInfo object = 2;
+        TarifInfo object = 2;
     }
     
     // Deleting
-    message RoomDeleteRequest {
+    message TarifDeleteRequest {
         int64 id = 1;
     }
     
-    message RoomDeleteResponse {
+    message TarifDeleteResponse {
         CRUDResult crud_result = 1;
     }
     
-    message RoomReadRequest {
+    message TarifReadRequest {
         int64 id = 1;
     }
     
-    message RoomReadResponse {
+    message TarifReadResponse {
         CRUDResult crud_result = 1;
-        RoomInfo object = 2;
+        TarifInfo object = 2;
     }
     
-    message  RoomListingRequest {
+    message  TarifListingRequest {
     }
     
-    message  RoomListingResponse  {
+    message  TarifListingResponse  {
         CRUDResult crud_result = 1;
-        repeated RoomInfo objects = 2;
+        repeated TarifInfo objects = 2;
     }
     
     

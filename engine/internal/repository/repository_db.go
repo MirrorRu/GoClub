@@ -6,8 +6,9 @@ import (
 	"fmt"
 	"goclub/engine/internal/config"
 	"goclub/engine/internal/repository/db"
-	membersrepo "goclub/engine/internal/repository/member_repo"
-	roomsrepo "goclub/engine/internal/repository/room_repo"
+	"goclub/engine/internal/repository/member_repo"
+	"goclub/engine/internal/repository/room_repo"
+	"goclub/engine/internal/repository/tarif_repo"
 	"goclub/model/members"
 	"goclub/model/rooms"
 
@@ -17,8 +18,9 @@ import (
 const dbDriver = "pgx"
 
 type pgDBRepo struct {
-	membersrepo.MembersRepo
-	roomsrepo.RoomsRepo
+	memberrepo.MembersRepo
+	roomrepo.RoomsRepo
+	tarifrepo.TarifsRepo
 	dbDSN  config.DBDSN
 	writer db.DbHandler
 	reader db.DbHandler
@@ -59,6 +61,7 @@ func (repo *pgDBRepo) Open() (err error) {
 
 	repo.MembersRepo = db.NewDictBaseDbRepo[members.Member](repo.writer, repo.reader)
 	repo.RoomsRepo = db.NewDictBaseDbRepo[rooms.Room](repo.writer, repo.reader)
+	repo.TarifsRepo = tarifrepo.NewTarifsRepo(repo.writer, repo.reader)
 	return nil
 }
 
@@ -80,10 +83,14 @@ func (repo *pgDBRepo) Close() (err error) {
 
 }
 
-func (repo *pgDBRepo) Members() membersrepo.MembersRepo {
+func (repo *pgDBRepo) Members() memberrepo.MembersRepo {
 	return repo.MembersRepo
 }
 
-func (repo *pgDBRepo) Rooms() roomsrepo.RoomsRepo {
+func (repo *pgDBRepo) Rooms() roomrepo.RoomsRepo {
 	return repo.RoomsRepo
+}
+
+func (repo *pgDBRepo) Tarifs() tarifrepo.TarifsRepo {
+	return repo.TarifsRepo
 }

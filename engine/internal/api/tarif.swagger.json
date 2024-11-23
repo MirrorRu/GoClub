@@ -1,12 +1,12 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "rooms.proto",
+    "title": "tarif.proto",
     "version": "version not set"
   },
   "tags": [
     {
-      "name": "Rooms"
+      "name": "Tarifs"
     }
   ],
   "consumes": [
@@ -16,14 +16,14 @@
     "application/json"
   ],
   "paths": {
-    "/api/v1/rooms": {
+    "/api/v1/tarifs": {
       "get": {
-        "operationId": "Rooms_RoomListing",
+        "operationId": "Tarifs_TarifListing",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/v1RoomListingResponse"
+              "$ref": "#/definitions/v1TarifListingResponse"
             }
           },
           "default": {
@@ -34,16 +34,16 @@
           }
         },
         "tags": [
-          "Rooms"
+          "Tarifs"
         ]
       },
       "post": {
-        "operationId": "Rooms_RoomCreate",
+        "operationId": "Tarifs_TarifCreate",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/v1RoomCreateResponse"
+              "$ref": "#/definitions/v1TarifCreateResponse"
             }
           },
           "default": {
@@ -59,23 +59,23 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/v1RoomCreateRequest"
+              "$ref": "#/definitions/v1TarifCreateRequest"
             }
           }
         ],
         "tags": [
-          "Rooms"
+          "Tarifs"
         ]
       }
     },
-    "/api/v1/rooms/{id}": {
+    "/api/v1/tarifs/{id}": {
       "get": {
-        "operationId": "Rooms_RoomRead",
+        "operationId": "Tarifs_TarifRead",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/v1RoomReadResponse"
+              "$ref": "#/definitions/v1TarifReadResponse"
             }
           },
           "default": {
@@ -95,16 +95,16 @@
           }
         ],
         "tags": [
-          "Rooms"
+          "Tarifs"
         ]
       },
       "delete": {
-        "operationId": "Rooms_RoomDelete",
+        "operationId": "Tarifs_TarifDelete",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/v1RoomDeleteResponse"
+              "$ref": "#/definitions/v1TarifDeleteResponse"
             }
           },
           "default": {
@@ -124,18 +124,18 @@
           }
         ],
         "tags": [
-          "Rooms"
+          "Tarifs"
         ]
       }
     },
-    "/api/v1/rooms/{object.id}": {
+    "/api/v1/tarifs/{object.id}": {
       "put": {
-        "operationId": "Rooms_RoomUpdate",
+        "operationId": "Tarifs_TarifUpdate",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/v1RoomUpdateResponse"
+              "$ref": "#/definitions/v1TarifUpdateResponse"
             }
           },
           "default": {
@@ -158,18 +158,18 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/RoomsRoomUpdateBody"
+              "$ref": "#/definitions/TarifsTarifUpdateBody"
             }
           }
         ],
         "tags": [
-          "Rooms"
+          "Tarifs"
         ]
       }
     }
   },
   "definitions": {
-    "RoomsRoomUpdateBody": {
+    "TarifsTarifUpdateBody": {
       "type": "object",
       "properties": {
         "object": {
@@ -177,6 +177,12 @@
           "properties": {
             "name": {
               "type": "string"
+            },
+            "startDate": {
+              "$ref": "#/definitions/v1Date"
+            },
+            "endDate": {
+              "$ref": "#/definitions/v1Date"
             }
           }
         }
@@ -220,27 +226,36 @@
         }
       }
     },
-    "v1RoomCreateRequest": {
+    "v1Date": {
+      "type": "object",
+      "properties": {
+        "yyyyMmDd": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "v1TarifCreateRequest": {
       "type": "object",
       "properties": {
         "object": {
-          "$ref": "#/definitions/v1RoomInfo"
+          "$ref": "#/definitions/v1TarifInfo"
         }
       },
       "title": "Creating"
     },
-    "v1RoomCreateResponse": {
+    "v1TarifCreateResponse": {
       "type": "object",
       "properties": {
         "crudResult": {
           "$ref": "#/definitions/v1CRUDResult"
         },
         "object": {
-          "$ref": "#/definitions/v1RoomInfo"
+          "$ref": "#/definitions/v1TarifInfo"
         }
       }
     },
-    "v1RoomDeleteResponse": {
+    "v1TarifDeleteResponse": {
       "type": "object",
       "properties": {
         "crudResult": {
@@ -248,7 +263,7 @@
         }
       }
     },
-    "v1RoomInfo": {
+    "v1TarifInfo": {
       "type": "object",
       "properties": {
         "id": {
@@ -257,10 +272,16 @@
         },
         "name": {
           "type": "string"
+        },
+        "startDate": {
+          "$ref": "#/definitions/v1Date"
+        },
+        "endDate": {
+          "$ref": "#/definitions/v1Date"
         }
       }
     },
-    "v1RoomListingResponse": {
+    "v1TarifListingResponse": {
       "type": "object",
       "properties": {
         "crudResult": {
@@ -270,30 +291,30 @@
           "type": "array",
           "items": {
             "type": "object",
-            "$ref": "#/definitions/v1RoomInfo"
+            "$ref": "#/definitions/v1TarifInfo"
           }
         }
       }
     },
-    "v1RoomReadResponse": {
+    "v1TarifReadResponse": {
       "type": "object",
       "properties": {
         "crudResult": {
           "$ref": "#/definitions/v1CRUDResult"
         },
         "object": {
-          "$ref": "#/definitions/v1RoomInfo"
+          "$ref": "#/definitions/v1TarifInfo"
         }
       }
     },
-    "v1RoomUpdateResponse": {
+    "v1TarifUpdateResponse": {
       "type": "object",
       "properties": {
         "crudResult": {
           "$ref": "#/definitions/v1CRUDResult"
         },
         "object": {
-          "$ref": "#/definitions/v1RoomInfo"
+          "$ref": "#/definitions/v1TarifInfo"
         }
       }
     }

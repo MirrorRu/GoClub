@@ -6,6 +6,7 @@ import (
 	clubsrv "goclub/engine/internal/server/club_srv"
 	membersrv "goclub/engine/internal/server/member_srv"
 	roomsrv "goclub/engine/internal/server/room_srv"
+	tarifsrv "goclub/engine/internal/server/tarif_srv"
 	"goclub/engine/internal/service"
 )
 
@@ -25,6 +26,7 @@ type appServer struct {
 	clubServer   APIServer
 	memberServer APIServer
 	roomServer   APIServer
+	tarifServer  APIServer
 }
 
 func NewAppServer(controller service.AppService) *appServer {
@@ -32,6 +34,7 @@ func NewAppServer(controller service.AppService) *appServer {
 		clubServer:   clubsrv.NewClubServer(controller),
 		memberServer: membersrv.NewMemberServer(controller),
 		roomServer:   roomsrv.NewRoomServer(controller),
+		tarifServer:  tarifsrv.NewTarifServer(controller),
 	}
 }
 
@@ -40,6 +43,7 @@ func (srv *appServer) APIs() []APIServer {
 		srv.clubServer,
 		srv.memberServer,
 		srv.roomServer,
+		srv.tarifServer,
 	}
 }
 
