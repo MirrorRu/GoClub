@@ -62,10 +62,66 @@ func (repo *tarifsRepo) QueryTextForCreate(_ *tarifs.Tarif) string {
 	for idx := range nonKeyFieldIds {
 		parmNums[idx] = "$" + strconv.Itoa(idx+1)
 	}
-	q := "insert into " + TableName + " (" + strings.Join(nonKeyFieldIds, ", ") + ") values (" + strings.Join(parmNums, ", ") + ")"
+	q := "insert into " +
+		TableName +
+		" (" +
+		strings.Join(nonKeyFieldIds, ", ") +
+		") values (" +
+		strings.Join(parmNums, ", ") +
+		")"
 	return q
 }
 
-func (repo *tarifsRepo) Create(ctx context.Context, data *tarifs.Tarif) (result common.CRUDResult[*tarifs.Tarif]) {
+func (repo *tarifsRepo) fieldAddress(fieldName string, data *tarifs.Tarif) (pointer any) {
+	switch fieldName {
+	case IDFieldKey:
+		return &data.ID
+	case NameFieldKey:
+		return &data.Name
+	case StartDateFieldKey:
+		return &data.StartDate
+	case EndDateFieldKey:
+		return &data.EndDate
+	}
+	return nil
+}
 
+func (repo *tarifsRepo) QueryArgsForCreate(data *tarifs.Tarif) (pointers []any) {
+	pointers = make(any, len(nonKeyFieldIds))
+	for idx, id := range nonKeyFieldIds {
+		pointers[idx] = repo.fieldAddress(id, data)
+	}
+	return pointers
+}
+
+func (repo *tarifsRepo) Create(ctx context.Context, member *tarifs.Tarif) (result common.CRUDResult[*tarifs.Tarif]) {
+	const fnName = "Create"
+	query := repo.QueryTextForInsert(member)
+	logger.Debug(ctx, fnName, "query", query)
+
+	queryArgs := QueryArgsForInsert(member)
+	logger.Debug(ctx, fnName, "queryArgs", queryArgs)
+
+	var rows *sql.Rows
+	rows, result.Error = repo.writeHandleLoc.Query(ctx, query, queryArgs...)
+	if result.Error != nil {
+		return result
+	}
+	logger.Debug(ctx, fnName, "rows", rows)
+
+	defer rows.Close()
+	var scanArgs []any
+	for rows.Next() {
+		if result.Data == nil {
+			result.Data = new(T)
+			scanArgs = ScanArgsForAllFields(result.Data)
+			logger.Debug(ctx, fnName, "scanArgs", scanArgs)
+		}
+		result.RecordsAffected++
+		rows.Scan(scanArgs...)
+	}
+	result.Error = rows.Err()
+
+	logger.Debug(ctx, fnName, "member", member)
+	return result
 }
