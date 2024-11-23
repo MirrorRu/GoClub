@@ -141,13 +141,40 @@ func QueryTextForInsert(record any) (query string) {
 func QueryArgsForInsert(record any) (pointers []any) {
 	tableInfo := ExtractStructInfo(record)
 
-	v := reflect.ValueOf(record).Elem()
-	pointers = make([]any, 0, len(tableInfo.KeyFields))
-	for idx := range tableInfo.Fields {
-		if tableInfo.Fields[idx].IsAutogen {
+	if reflect.TypeOf(record).Kind() != reflect.Pointer {
+		panic("pointer needed")
+	}
+	elem := reflect.ValueOf(record).Elem()
+
+	pointers = make([]any, 0, len(tableInfo.Fields))
+	for _, field := range tableInfo.Fields {
+		if field.IsAutogen {
 			continue
 		}
-		pointers = append(pointers, v.Field(idx).Addr().Interface())
+		e2 := elem
+		var ptr any
+		for k, v := range field.StructFieldNums {
+			if k < len(field.StructFieldNums)-1 {
+				e2 = e2.Field(v)
+				continue
+			}
+			if e2.Kind() == reflect.Struct {
+				ff := e2.Field(v)
+				addr := ff.Addr()
+				ptr = addr.Interface()
+			}
+			if e2.Kind() == reflect.Pointer {
+				if !e2.IsNil() {
+					ff := e2.Elem()
+					ff = ff.Field(v)
+					addr := ff.Addr()
+					ptr = addr.Interface()
+				}
+			}
+
+		}
+		pointers = append(pointers, ptr)
+
 	}
 	return pointers
 }

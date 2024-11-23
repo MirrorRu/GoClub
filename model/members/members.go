@@ -11,6 +11,7 @@ type (
 	Birthday common.Date //common.Option[common.Date]
 
 	Member struct {
+		common.DBTableBasis
 		ID       ID       `json:"id" db:"groups=key;auto;base|title=Код"`
 		FullName FullName `json:"name" db:"groups=base|title=Имя|name=name"`
 		Birthday Birthday `json:"birthday" db:"groups=base|title=День рождения"`
