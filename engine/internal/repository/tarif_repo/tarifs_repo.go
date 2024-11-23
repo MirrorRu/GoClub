@@ -5,11 +5,10 @@ import (
 	"database/sql"
 	"goclub/common/logger"
 	"goclub/engine/internal/repository/db"
+	"goclub/engine/internal/repository/dbext"
 	"goclub/model/common"
 	"goclub/model/tarifs"
 	"slices"
-	"strconv"
-	"strings"
 )
 
 // CREATE TABLE dict.tarifs (
@@ -28,16 +27,6 @@ const (
 	EndDateFieldKey   = "end_date"
 )
 
-func collectIds(src map[string]common.TableField, filter func(fld common.TableField) (canAdd bool)) []string {
-	result := make([]string, 0, len(src))
-	for k, v := range src {
-		if filter(v) {
-			result = append(result, k)
-		}
-	}
-	return result
-}
-
 var (
 	tableFields = map[string]common.TableField{
 		IDFieldKey:        {Name: IDFieldKey, Title: "Код тарифа", IsKey: true},
@@ -46,13 +35,13 @@ var (
 		EndDateFieldKey:   {Name: EndDateFieldKey, Title: "Окончание действия"},
 	}
 
-	allFieldIds    = collectIds(tableFields, func(fld common.TableField) (canAdd bool) { return true })
-	keyFieldIds    = collectIds(tableFields, func(fld common.TableField) (canAdd bool) { return fld.IsKey })
-	nonKeyFieldIds = collectIds(tableFields, func(fld common.TableField) (canAdd bool) { return !fld.IsKey })
+	allFieldIds    = common.CollectIds(tableFields, func(fld common.TableField) (canAdd bool) { return true })
+	keyFieldIds    = common.CollectIds(tableFields, func(fld common.TableField) (canAdd bool) { return fld.IsKey })
+	nonKeyFieldIds = common.CollectIds(tableFields, func(fld common.TableField) (canAdd bool) { return !fld.IsKey })
 )
 
 type TarifsRepo interface {
-	common.CRUDRepo[*tarifs.Tarif]
+	common.CRUDRepoExt[*tarifs.Tarif]
 }
 
 type (
@@ -69,79 +58,7 @@ func NewTarifsRepo(writeHandler db.DbHandler, readHandler db.DbHandler) *tarifsR
 	}
 }
 
-func (repo *tarifsRepo) QueryTextForInsert() string {
-	fields := make([]string, len(nonKeyFieldIds))
-	for idx := range nonKeyFieldIds {
-		fields[idx] = "$" + strconv.Itoa(idx+1)
-	}
-	q := "insert into " +
-		TableName +
-		" (" +
-		strings.Join(nonKeyFieldIds, ", ") +
-		") values (" +
-		strings.Join(fields, ", ") +
-		") returning " +
-		strings.Join(allFieldIds, ", ")
-	return q
-}
-
-func (repo *tarifsRepo) QueryTextForDelete() string {
-	keys := make([]string, len(keyFieldIds))
-	for idx, id := range keyFieldIds {
-		keys[idx] = id + "=$" + strconv.Itoa(idx+1)
-	}
-	q := "delete from " +
-		TableName +
-		" where " +
-		strings.Join(keys, " and ")
-	return q
-}
-
-func (repo *tarifsRepo) QueryTextForUpdate() string {
-	fields := make([]string, len(nonKeyFieldIds))
-	for idx, id := range nonKeyFieldIds {
-		fields[idx] = id + "=$" + strconv.Itoa(idx+1)
-	}
-	keys := make([]string, len(keyFieldIds))
-	for idx, id := range keyFieldIds {
-		keys[idx] = id + "=$" + strconv.Itoa(idx+1)
-	}
-	q := "update " +
-		TableName +
-		" set " +
-		strings.Join(fields, ", ") +
-		" where " +
-		strings.Join(keys, " and ") +
-		" returning " +
-		strings.Join(allFieldIds, ", ")
-	return q
-}
-
-func (repo *tarifsRepo) QueryTextForRead() string {
-	keys := make([]string, len(keyFieldIds))
-	for idx, id := range keyFieldIds {
-		keys[idx] = id + "=$" + strconv.Itoa(idx+1)
-	}
-	q := "select " +
-		strings.Join(allFieldIds, ", ") +
-		" from " +
-		TableName +
-		" where " +
-		strings.Join(keys, " and ")
-	return q
-}
-
-func (repo *tarifsRepo) QueryTextForList(filter any) string {
-	q := "select " +
-		strings.Join(allFieldIds, ", ") +
-		" from " +
-		TableName +
-		" order by " +
-		strings.Join(keyFieldIds, ", ")
-	return q
-}
-
-func (repo *tarifsRepo) fieldAddress(fieldName string, data *tarifs.Tarif) (pointer any) {
+func (repo *tarifsRepo) GetFieldAddress(fieldName string, data *tarifs.Tarif) (pointer any) {
 	switch fieldName {
 	case IDFieldKey:
 		return &data.ID
@@ -158,7 +75,7 @@ func (repo *tarifsRepo) fieldAddress(fieldName string, data *tarifs.Tarif) (poin
 func (repo *tarifsRepo) QueryArgsForInsert(data *tarifs.Tarif) (pointers []any) {
 	pointers = make([]any, len(nonKeyFieldIds))
 	for idx, id := range nonKeyFieldIds {
-		pointers[idx] = repo.fieldAddress(id, data)
+		pointers[idx] = repo.GetFieldAddress(id, data)
 	}
 	return pointers
 }
@@ -166,14 +83,22 @@ func (repo *tarifsRepo) QueryArgsForInsert(data *tarifs.Tarif) (pointers []any) 
 func (repo *tarifsRepo) QueryArgsForUpdate(data *tarifs.Tarif) (fields []any) {
 	updates := make([]any, len(nonKeyFieldIds))
 	for idx, id := range nonKeyFieldIds {
-		updates[idx] = repo.fieldAddress(id, data)
+		updates[idx] = repo.GetFieldAddress(id, data)
 	}
 	keys := make([]any, len(keyFieldIds))
 	for idx, id := range keyFieldIds {
-		keys[idx] = repo.fieldAddress(id, data)
+		keys[idx] = repo.GetFieldAddress(id, data)
 	}
 
 	return slices.Concat(updates, keys)
+}
+
+func (repo *tarifsRepo) QueryArgsForKey(data *tarifs.Tarif) (fields []any) {
+	keys := make([]any, len(keyFieldIds))
+	for idx, id := range keyFieldIds {
+		keys[idx] = repo.GetFieldAddress(id, data)
+	}
+	return keys
 }
 
 func (repo *tarifsRepo) QueryArgsForList(filter any) (fields []any) {
@@ -183,14 +108,14 @@ func (repo *tarifsRepo) QueryArgsForList(filter any) (fields []any) {
 func (repo *tarifsRepo) ScanArgsForAllFields(data *tarifs.Tarif) (pointers []any) {
 	pointers = make([]any, len(allFieldIds))
 	for idx, id := range allFieldIds {
-		pointers[idx] = repo.fieldAddress(id, data)
+		pointers[idx] = repo.GetFieldAddress(id, data)
 	}
 	return pointers
 }
 
 func (repo *tarifsRepo) Create(ctx context.Context, data *tarifs.Tarif) (result common.CRUDResult[*tarifs.Tarif]) {
 	const fnName = "Create"
-	query := repo.QueryTextForInsert()
+	query := dbext.QueryTextForInsert(TableName, nonKeyFieldIds, allFieldIds)
 	logger.Debug(ctx, fnName, "query", query)
 
 	queryArgs := repo.QueryArgsForInsert(data)
@@ -220,13 +145,15 @@ func (repo *tarifsRepo) Create(ctx context.Context, data *tarifs.Tarif) (result 
 	return result
 }
 
-func (repo *tarifsRepo) Delete(ctx context.Context, keys ...any) (result common.CRUDResult[struct{}]) {
+func (repo *tarifsRepo) Delete(ctx context.Context, keys *tarifs.Tarif) (result common.CRUDResult[struct{}]) {
 	const fnName = "Delete"
-	query := repo.QueryTextForDelete()
+	query := dbext.QueryTextForDelete(TableName, keyFieldIds)
 	logger.Debug(ctx, fnName, "query", query)
 
+	queryArgs := repo.QueryArgsForKey(keys)
+
 	var execRes sql.Result
-	execRes, result.Error = repo.writeHandler.Exec(ctx, query, keys...)
+	execRes, result.Error = repo.writeHandler.Exec(ctx, query, queryArgs...)
 	if result.Error != nil {
 		return result
 	}
@@ -238,7 +165,7 @@ func (repo *tarifsRepo) Delete(ctx context.Context, keys ...any) (result common.
 // Update(ctx context.Context, data DataType) (result CRUDResult[DataType])
 func (repo *tarifsRepo) Update(ctx context.Context, data *tarifs.Tarif) (result common.CRUDResult[*tarifs.Tarif]) {
 	const fnName = "Update"
-	query := repo.QueryTextForUpdate()
+	query := dbext.QueryTextForUpdate(TableName, nonKeyFieldIds, keyFieldIds, allFieldIds)
 	logger.Debug(ctx, fnName, "query", query)
 
 	queryArgs := repo.QueryArgsForUpdate(data)
@@ -269,14 +196,15 @@ func (repo *tarifsRepo) Update(ctx context.Context, data *tarifs.Tarif) (result 
 }
 
 // Read(ctx context.Context, keys ...any) (result CRUDResult[DataType])
-func (repo *tarifsRepo) Read(ctx context.Context, keys ...any) (result common.CRUDResult[*tarifs.Tarif]) {
+func (repo *tarifsRepo) Read(ctx context.Context, keys *tarifs.Tarif) (result common.CRUDResult[*tarifs.Tarif]) {
 	const fnName = "Read"
 	data := new(tarifs.Tarif)
-	query := repo.QueryTextForRead()
+	query := dbext.QueryTextForRead(TableName, keyFieldIds, allFieldIds)
 	logger.Debug(ctx, fnName, "query", query)
 
+	queryArgs := repo.QueryArgsForKey(keys)
 	var rows *sql.Rows
-	rows, result.Error = repo.readHandler.Query(ctx, query, keys...)
+	rows, result.Error = repo.readHandler.Query(ctx, query, queryArgs...)
 	if result.Error != nil {
 		return result
 	}
@@ -300,9 +228,9 @@ func (repo *tarifsRepo) Read(ctx context.Context, keys ...any) (result common.CR
 }
 
 // List(ctx context.Context, filter any) (result CRUDResult[[]DataType])
-func (repo *tarifsRepo) List(ctx context.Context, filter any) (result common.CRUDResult[[]*tarifs.Tarif]) {
+func (repo *tarifsRepo) List(ctx context.Context, filter common.ListFilter) (result common.CRUDResult[[]*tarifs.Tarif]) {
 	const fnName = "List"
-	query := repo.QueryTextForList(filter)
+	query := dbext.QueryTextForList(TableName, keyFieldIds, allFieldIds, filter)
 	logger.Debug(ctx, fnName, "query", query)
 
 	queryArgs := repo.QueryArgsForList(filter)

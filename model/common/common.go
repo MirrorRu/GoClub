@@ -1,16 +1,10 @@
 package common
 
-import (
-	"database/sql/driver"
-	"time"
-)
-
 type (
 	ID int64
 
 	Name  string
 	Notes string
-	Date  int
 
 	Option[T any] struct {
 		Setted bool // Is value setted and valid
@@ -81,28 +75,12 @@ func NewDataTableDefinion(name string, title string, fields []DataFieldDefinitio
 	}
 }
 
-func (d Date) ToDate() time.Time {
-	//return d, nil
-	year := int(d)
-	day := year % 100
-	year -= day
-	month := year % 100
-	year -= month
-	val := time.Date(year, time.Month(month), day, 0, 0, 0, 0, nil)
-	return val
-}
-
-func (d *Date) FromDate(t time.Time) {
-	//return d, nil
-	*d = Date(t.Year()*10000 + int(t.Month())*100 + t.Day())
-}
-
-// Value implements the [driver.Valuer] interface.
-func (d Date) Value() (driver.Value, error) {
-	return d.ToDate(), nil
-}
-
-// Scan implements the [Scanner] interface.
-func (d *Date) Scan(value any) error {
-	return nil
+func CollectIds(src map[string]TableField, filter func(fld TableField) (canAdd bool)) []string {
+	result := make([]string, 0, len(src))
+	for k, v := range src {
+		if filter(v) {
+			result = append(result, k)
+		}
+	}
+	return result
 }

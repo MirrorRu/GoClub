@@ -1,6 +1,8 @@
 package common
 
-import "context"
+import (
+	"context"
+)
 
 type CRUDInfo struct {
 	RecordsAffected int64
@@ -26,4 +28,22 @@ type CRUDService[DataType any] interface {
 	Delete(ctx context.Context, keys ...any) (result CRUDResult[struct{}])
 	Read(ctx context.Context, keys ...any) (result CRUDResult[DataType])
 	Listing(ctx context.Context, filter any) (result CRUDResult[[]DataType])
+}
+type ListFilter interface {
+}
+
+type CRUDRepoExt[DataType any] interface {
+	Create(ctx context.Context, data DataType) (result CRUDResult[DataType])
+	Update(ctx context.Context, data DataType) (result CRUDResult[DataType])
+	Delete(ctx context.Context, keys DataType) (result CRUDResult[struct{}])
+	Read(ctx context.Context, keys DataType) (result CRUDResult[DataType])
+	List(ctx context.Context, filter ListFilter) (result CRUDResult[[]DataType])
+}
+
+type CRUDServiceExt[DataType any] interface {
+	Create(ctx context.Context, data DataType) (result CRUDResult[DataType])
+	Update(ctx context.Context, data DataType) (result CRUDResult[DataType])
+	Delete(ctx context.Context, keys DataType) (result CRUDResult[struct{}])
+	Read(ctx context.Context, keys DataType) (result CRUDResult[DataType])
+	Listing(ctx context.Context, filter ListFilter) (result CRUDResult[[]DataType])
 }

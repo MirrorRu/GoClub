@@ -6,6 +6,7 @@ import (
 	"goclub/engine/internal/api"
 	"goclub/engine/internal/repack"
 	"goclub/engine/internal/service"
+	"goclub/model/tarifs"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 
@@ -66,7 +67,7 @@ func (srv *tarifsServer) TarifUpdate(ctx context.Context, req *api.TarifUpdateRe
 }
 
 func (srv *tarifsServer) TarifDelete(ctx context.Context, req *api.TarifDeleteRequest) (resp *api.TarifDeleteResponse, err error) {
-	crudRes := srv.actor.Tarifs().Delete(ctx, req.GetId())
+	crudRes := srv.actor.Tarifs().Delete(ctx, &tarifs.Tarif{ID: tarifs.ID(req.GetId())})
 	if crudRes.Error != nil {
 		return nil, crudRes.Error
 	}
@@ -91,7 +92,7 @@ func (srv *tarifsServer) TarifListing(ctx context.Context, req *api.TarifListing
 }
 
 func (srv *tarifsServer) TarifRead(ctx context.Context, req *api.TarifReadRequest) (resp *api.TarifReadResponse, err error) {
-	crudRes := srv.actor.Tarifs().Read(ctx, req.GetId())
+	crudRes := srv.actor.Tarifs().Read(ctx, &tarifs.Tarif{ID: tarifs.ID(req.GetId())})
 	if crudRes.Error != nil {
 		return nil, crudRes.Error
 	}

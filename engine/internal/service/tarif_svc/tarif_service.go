@@ -6,5 +6,5 @@ import (
 )
 
 type TarifsService interface {
-	common.CRUDService[*tarifs.Tarif]
+	common.CRUDServiceExt[*tarifs.Tarif]
 }

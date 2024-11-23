@@ -37,7 +37,7 @@ func NewAppService(repo repository.Repository) (appSvc *appService) {
 		club:    clubsvc.NewClubService(repo),
 		members: NewDictBaseService[members.Member](repo.Members()),
 		rooms:   NewDictBaseService[rooms.Room](repo.Rooms()),
-		tarifs:  NewDictBaseService[tarifs.Tarif](repo.Tarifs()),
+		tarifs:  NewDictBaseServiceExt[tarifs.Tarif](repo.Tarifs()),
 	}
 	return appSvc
 }

@@ -6,7 +6,6 @@ import (
 	"goclub/common/logger"
 	"goclub/engine/internal/app"
 	"goclub/engine/internal/config"
-	"goclub/engine/internal/repository/tarif_repo"
 	"os"
 )
 
@@ -38,12 +37,12 @@ type TopType struct {
 }
 
 func main0() {
-	tr := tarifrepo.NewTarifsRepo(nil, nil)
-	fmt.Println(tr.QueryTextForInsert())
-	fmt.Println(tr.QueryTextForUpdate())
-	fmt.Println(tr.QueryTextForDelete())
-	fmt.Println(tr.QueryTextForRead())
-	fmt.Println(tr.QueryTextForList(nil))
+	// tr := tarifrepo.NewTarifsRepo(nil, nil)
+	// fmt.Println(tr.QueryTextForInsert())
+	// fmt.Println(tr.QueryTextForUpdate())
+	// fmt.Println(tr.QueryTextForDelete())
+	// fmt.Println(tr.QueryTextForRead())
+	// fmt.Println(tr.QueryTextForList(nil))
 }
 
 func main() {
