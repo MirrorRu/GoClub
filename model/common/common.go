@@ -75,11 +75,24 @@ func NewDataTableDefinion(name string, title string, fields []DataFieldDefinitio
 	}
 }
 
-func CollectIds(src map[string]TableField, filter func(fld TableField) (canAdd bool)) []string {
-	result := make([]string, 0, len(src))
+func CollectIds(src map[int]TableField, filter func(fld TableField) (canAdd bool)) []int {
+	result := make([]int, 0)
 	for k, v := range src {
 		if filter(v) {
 			result = append(result, k)
+		}
+	}
+	return result
+}
+
+func CollectNames(src map[int]TableField, ids []int) []string {
+	result := make([]string, 0, len(ids))
+	for _, v := range ids {
+		tf, ok := src[v]
+		if ok {
+			result = append(result, tf.Name)
+		} else {
+			result = append(result, "null")
 		}
 	}
 	return result
