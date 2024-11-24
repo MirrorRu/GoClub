@@ -6,11 +6,13 @@ import (
 	"fmt"
 	"goclub/engine/internal/config"
 	"goclub/engine/internal/repository/db"
+	"goclub/engine/internal/repository/dbext"
 	"goclub/engine/internal/repository/member_repo"
 	"goclub/engine/internal/repository/room_repo"
 	"goclub/engine/internal/repository/tarif_repo"
 	"goclub/model/members"
 	"goclub/model/rooms"
+	"goclub/model/tarifs"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
@@ -61,7 +63,7 @@ func (repo *pgDBRepo) Open() (err error) {
 
 	repo.MembersRepo = db.NewDictBaseDbRepo[members.Member](repo.writer, repo.reader)
 	repo.RoomsRepo = db.NewDictBaseDbRepo[rooms.Room](repo.writer, repo.reader)
-	repo.TarifsRepo = tarifrepo.NewTarifsRepo(repo.writer, repo.reader)
+	repo.TarifsRepo = dbext.NewCRUDRepo[tarifs.Tarif](tarifrepo.NewTarifTableInfo(), repo.writer, repo.reader)
 	return nil
 }
 

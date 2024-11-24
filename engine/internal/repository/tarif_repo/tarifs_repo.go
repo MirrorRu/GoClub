@@ -1,14 +1,9 @@
 package tarifrepo
 
 import (
-	"context"
-	"database/sql"
-	"goclub/common/logger"
-	"goclub/engine/internal/repository/db"
 	"goclub/engine/internal/repository/dbext"
 	"goclub/model/common"
 	"goclub/model/tarifs"
-	"slices"
 )
 
 // CREATE TABLE dict.tarifs (
@@ -20,7 +15,7 @@ import (
 // );
 
 const (
-	TableName = "dict.tarifs"
+	tableName = "dict.tarifs"
 )
 const (
 	IDFieldKey int = iota
@@ -37,18 +32,52 @@ var (
 		EndDateFieldKey:   {Name: "end_date", Title: "Окончание действия"},
 	}
 
-	allFieldIds      = common.CollectIds(tableFields, func(fld common.TableField) (canAdd bool) { return true })
-	allFieldNames    = common.CollectNames(tableFields, allFieldIds)
-	keyFieldIds      = common.CollectIds(tableFields, func(fld common.TableField) (canAdd bool) { return fld.IsKey })
-	keyFieldNames    = common.CollectNames(tableFields, keyFieldIds)
-	nonKeyFieldIds   = common.CollectIds(tableFields, func(fld common.TableField) (canAdd bool) { return !fld.IsKey })
-	nonKeyFieldNames = common.CollectNames(tableFields, nonKeyFieldIds)
+	allFieldIds    = common.CollectIds(tableFields, func(fld common.TableField) (canAdd bool) { return true })
+	keyFieldIds    = common.CollectIds(tableFields, func(fld common.TableField) (canAdd bool) { return fld.IsKey })
+	nonKeyFieldIds = common.CollectIds(tableFields, func(fld common.TableField) (canAdd bool) { return !fld.IsKey })
 )
+
+type TarifTableInfo struct {
+	dbext.TableInfoSimple
+}
+
+func (ti *TarifTableInfo) GetFieldsAddr(data *tarifs.Tarif, fieldIds []int) (pointers []any) {
+	pointers = make([]any, len(fieldIds))
+	var a any
+	for idx, fieldId := range fieldIds {
+		switch fieldId {
+		case IDFieldKey:
+			a = &data.ID
+		case NameFieldKey:
+			a = &data.Name
+		case StartDateFieldKey:
+			a = &data.StartDate
+		case EndDateFieldKey:
+			a = &data.EndDate
+		default:
+			a = nil
+		}
+		pointers[idx] = a
+	}
+	return pointers
+}
+func NewTarifTableInfo() *TarifTableInfo {
+	return &TarifTableInfo{
+		TableInfoSimple: dbext.NewTableInfoSimple(
+			tableName,
+			tableFields,
+			keyFieldIds,
+			nonKeyFieldIds,
+			allFieldIds,
+		),
+	}
+}
 
 type TarifsRepo interface {
 	common.CRUDRepoExt[*tarifs.Tarif]
 }
 
+/*
 type (
 	tarifsRepo struct {
 		writeHandler db.DbHandler
@@ -63,7 +92,7 @@ func NewTarifsRepo(writeHandler db.DbHandler, readHandler db.DbHandler) *tarifsR
 	}
 }
 
-func (repo *tarifsRepo) GetFieldsAddres(data *tarifs.Tarif, fieldIds []int) (pointers []any) {
+func (repo *tarifsRepo) GetFieldsAddr(data *tarifs.Tarif, fieldIds []int) (pointers []any) {
 	pointers = make([]any, len(fieldIds))
 	var a any
 	for idx, fieldId := range fieldIds {
@@ -86,10 +115,10 @@ func (repo *tarifsRepo) GetFieldsAddres(data *tarifs.Tarif, fieldIds []int) (poi
 
 func (repo *tarifsRepo) Create(ctx context.Context, data *tarifs.Tarif) (result common.CRUDResult[*tarifs.Tarif]) {
 	const fnName = "Create"
-	query := dbext.QueryTextForInsert(TableName, nonKeyFieldNames, allFieldNames)
+	query := dbext.QueryTextForInsert(tableName, nonKeyFieldNames, allFieldNames)
 	logger.Debug(ctx, fnName, "query", query)
 
-	queryArgs := repo.GetFieldsAddres(data, nonKeyFieldIds)
+	queryArgs := repo.GetFieldsAddr(data, nonKeyFieldIds)
 	logger.Debug(ctx, fnName, "queryArgs", queryArgs)
 
 	var rows *sql.Rows
@@ -104,7 +133,7 @@ func (repo *tarifsRepo) Create(ctx context.Context, data *tarifs.Tarif) (result 
 	for rows.Next() {
 		if result.Data == nil {
 			result.Data = new(tarifs.Tarif)
-			scanArgs = repo.GetFieldsAddres(result.Data, allFieldIds)
+			scanArgs = repo.GetFieldsAddr(result.Data, allFieldIds)
 			logger.Debug(ctx, fnName, "scanArgs", scanArgs)
 		}
 		result.RecordsAffected++
@@ -118,10 +147,10 @@ func (repo *tarifsRepo) Create(ctx context.Context, data *tarifs.Tarif) (result 
 
 func (repo *tarifsRepo) Delete(ctx context.Context, keys *tarifs.Tarif) (result common.CRUDResult[struct{}]) {
 	const fnName = "Delete"
-	query := dbext.QueryTextForDelete(TableName, keyFieldNames)
+	query := dbext.QueryTextForDelete(tableName, keyFieldNames)
 	logger.Debug(ctx, fnName, "query", query)
 
-	queryArgs := repo.GetFieldsAddres(keys, keyFieldIds)
+	queryArgs := repo.GetFieldsAddr(keys, keyFieldIds)
 
 	var execRes sql.Result
 	execRes, result.Error = repo.writeHandler.Exec(ctx, query, queryArgs...)
@@ -136,10 +165,10 @@ func (repo *tarifsRepo) Delete(ctx context.Context, keys *tarifs.Tarif) (result 
 // Update(ctx context.Context, data DataType) (result CRUDResult[DataType])
 func (repo *tarifsRepo) Update(ctx context.Context, data *tarifs.Tarif) (result common.CRUDResult[*tarifs.Tarif]) {
 	const fnName = "Update"
-	query := dbext.QueryTextForUpdate(TableName, nonKeyFieldNames, keyFieldNames, allFieldNames)
+	query := dbext.QueryTextForUpdate(tableName, nonKeyFieldNames, keyFieldNames, allFieldNames)
 	logger.Debug(ctx, fnName, "query", query)
 
-	queryArgs := repo.GetFieldsAddres(data, slices.Concat(nonKeyFieldIds, keyFieldIds))
+	queryArgs := repo.GetFieldsAddr(data, slices.Concat(nonKeyFieldIds, keyFieldIds))
 	logger.Debug(ctx, fnName, "queryArgs", queryArgs)
 
 	var rows *sql.Rows
@@ -154,7 +183,7 @@ func (repo *tarifsRepo) Update(ctx context.Context, data *tarifs.Tarif) (result 
 	for rows.Next() {
 		if result.Data == nil {
 			result.Data = new(tarifs.Tarif)
-			scanArgs = repo.GetFieldsAddres(result.Data, allFieldIds)
+			scanArgs = repo.GetFieldsAddr(result.Data, allFieldIds)
 			logger.Debug(ctx, fnName, "scanArgs", scanArgs)
 		}
 		result.RecordsAffected++
@@ -170,10 +199,10 @@ func (repo *tarifsRepo) Update(ctx context.Context, data *tarifs.Tarif) (result 
 func (repo *tarifsRepo) Read(ctx context.Context, keys *tarifs.Tarif) (result common.CRUDResult[*tarifs.Tarif]) {
 	const fnName = "Read"
 	data := new(tarifs.Tarif)
-	query := dbext.QueryTextForRead(TableName, keyFieldNames, allFieldNames)
+	query := dbext.QueryTextForRead(tableName, keyFieldNames, allFieldNames)
 	logger.Debug(ctx, fnName, "query", query)
 
-	queryArgs := repo.GetFieldsAddres(keys, keyFieldIds)
+	queryArgs := repo.GetFieldsAddr(keys, keyFieldIds)
 	var rows *sql.Rows
 	rows, result.Error = repo.readHandler.Query(ctx, query, queryArgs...)
 	if result.Error != nil {
@@ -186,7 +215,7 @@ func (repo *tarifsRepo) Read(ctx context.Context, keys *tarifs.Tarif) (result co
 	for rows.Next() {
 		if result.Data == nil {
 			result.Data = data
-			scanArgs = repo.GetFieldsAddres(result.Data, allFieldIds)
+			scanArgs = repo.GetFieldsAddr(result.Data, allFieldIds)
 			logger.Debug(ctx, fnName, "scanArgs", scanArgs)
 		}
 		result.RecordsAffected++
@@ -201,7 +230,7 @@ func (repo *tarifsRepo) Read(ctx context.Context, keys *tarifs.Tarif) (result co
 // List(ctx context.Context, filter any) (result CRUDResult[[]DataType])
 func (repo *tarifsRepo) List(ctx context.Context, filter common.ListFilter) (result common.CRUDResult[[]*tarifs.Tarif]) {
 	const fnName = "List"
-	query := dbext.QueryTextForList(TableName, keyFieldNames, allFieldNames, filter)
+	query := dbext.QueryTextForList(tableName, keyFieldNames, allFieldNames, filter)
 	logger.Debug(ctx, fnName, "query", query)
 
 	//queryArgs := repo.QueryArgsForList(filter)
@@ -221,7 +250,7 @@ func (repo *tarifsRepo) List(ctx context.Context, filter common.ListFilter) (res
 		if result.Data == nil {
 			result.Data = make([]*tarifs.Tarif, 0)
 			data = new(tarifs.Tarif)
-			scanArgs = repo.GetFieldsAddres(data, allFieldIds)
+			scanArgs = repo.GetFieldsAddr(data, allFieldIds)
 			logger.Debug(ctx, fnName, "scanArgs", scanArgs)
 		}
 		result.RecordsAffected++
@@ -234,3 +263,4 @@ func (repo *tarifsRepo) List(ctx context.Context, filter common.ListFilter) (res
 	logger.Debug(ctx, fnName, "data", data)
 	return result
 }
+*/

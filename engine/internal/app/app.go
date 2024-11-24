@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"goclub/common/logger"
 	"goclub/engine/internal/config"
@@ -108,18 +109,14 @@ func (a *app) Run(ctx context.Context, cfg *config.AppConfig) (err error) {
 	ctx, a.cancelFunc = signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer a.cancelFunc()
 
-	//a.AppServer(ctx) // Инициализаруем объекты по цепочке Server-Service-Repo-...
-
 	if err = a.Repo().Open(); err != nil {
 		return err
 	}
+
+	a.AppServer(ctx) // Инициализаруем объекты по цепочке Server-Service-Repo-...
+
 	//Создаем "группу контроля работы" errgroup.Group и констекст для остановки смежных процессов
 	a.errGrp, a.errGrpCtx = errgroup.WithContext(ctx)
-
-	// Запускаем репозиторий
-	repoStartStoper := NewStartStopAdpt(ctx, nil, a.Repo().Close)
-	a.runComponent(ctx, AppComponentInfo{cargo: repoStartStoper, title: "Repository"})
-	// <<<
 
 	// Создаем и запускаем gRPC-сервер
 	a.grpcSrv = grpcserver.NewGRPCServer(ctx, cfg.GRPCAddress)
@@ -139,5 +136,8 @@ func (a *app) Run(ctx context.Context, cfg *config.AppConfig) (err error) {
 
 	logger.Info(ctx, "Application started")
 	err = a.errGrp.Wait()
+	repoCloseErr := a.Repo().Close()
+
+	err = errors.Join(err, repoCloseErr)
 	return err
 }
