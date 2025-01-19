@@ -22,17 +22,4 @@ include makefile-setup
 include makefile-proto
 
 .PHONY: setup
-setup: setup-bin setup-proto
-
-.PHONY: generate
-# genproto см.  makefile-proto
-generate: genproto genmock
-
-.PHONY: genmock
-genmock:
-# 	$(info Generating mocks...)
-# 	@for f in $(shell find internal -name 'genmock.go'| sort -u); do \
-# 		go generate $$f; \
-# 	done
-# 	$(info mocks generated)
 

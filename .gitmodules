@@ -1,3 +1,0 @@
-[submodule "engine/proto/googleapis"]
-	path = engine/proto/googleapis
-	url = https://github.com/googleapis/googleapis
