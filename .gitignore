@@ -25,4 +25,6 @@
 !.vscode/launch.json
 **/temp
 
+**face/jquery-easyui/demo
+**face/jquery-easyui/demo-mobile
 
