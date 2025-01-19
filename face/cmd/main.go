@@ -1,7 +1,8 @@
 package main
 
-import "fmt"
+import "goclub/v1/face/internal/face_app"
 
 func main() {
-	fmt.Println("Hello World")
+	app := face_app.NewFaceApp()
+	app.Run()
 }
